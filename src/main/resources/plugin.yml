@@ -1,0 +1,12 @@
+name: jPanel
+version: 1.0-SNAPSHOT
+description: Adds a web panel to a minecraft server.
+author: rymate1234
+load: STARTUP
+
+main: net.rymate.jpanel.PanelPlugin
+
+commands:
+   addlogin:
+      description: Adds a user to jPanel
+      usage: /<command> [username] [password]
