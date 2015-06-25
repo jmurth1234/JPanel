@@ -141,6 +141,27 @@ public class PanelPlugin extends JavaPlugin {
 
         }, new HandlebarsTemplateEngine());
 
+        get("/players", (req, res) -> {
+            Map map = new HashMap();
+            String version = getServer().getVersion();
+            map.put("version", version);
+
+            List<String> names = new ArrayList<String>();
+
+            for (Player p : getServer().getOnlinePlayers()) {
+                names.add(p.getName());
+            }
+
+            map.put("players", names);
+
+            if (sessions.contains(req.cookie("loggedin"))) {
+                return new ModelAndView(map, "players.hbs");
+            } else {
+                return new ModelAndView(map, "login.hbs");
+            }
+
+        }, new HandlebarsTemplateEngine());
+
         get("/stats", "application/json", (request, response) -> {
             Gson gson = new Gson();
 
@@ -195,7 +216,7 @@ public class PanelPlugin extends JavaPlugin {
                 sessions.add(sessionId.toString());
                 response.cookie("loggedin", sessionId.toString(), 3600);
             }
-            
+
             response.redirect("/");
             return 0;
         });
