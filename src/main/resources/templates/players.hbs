@@ -47,15 +47,15 @@
         <a href="#" data-activates="mobile-demo" class="button-collapse"><i class="material-icons">menu</i></a>
         <a href="#" class="brand-logo">JPanel</a>
         <ul id="nav-mobile" class="right hide-on-med-and-down">
-            <li><a href="">Home</a></li>
-            <li><a href="">Online Players</a></li>
+            <li><a href="/">Home</a></li>
+            <li><a href="/players">Online Players</a></li>
             <li><a href="">File manager</a></li>
             <li><a href="">Permissions manager</a></li>
         </ul>
 
         <ul class="side-nav" id="mobile-demo">
-            <li><a href="">Home</a></li>
-            <li><a href="">Online Players</a></li>
+            <li><a href="/">Home</a></li>
+            <li><a href="/players">Online Players</a></li>
             <li><a href="">File manager</a></li>
             <li><a href="">Permissions manager</a></li>
         </ul>
@@ -80,15 +80,10 @@
                                 </div>
                             </div>
 
-                            <div class="divider"></div>
-
-                            <div class="card-content">
-                                <p>Placeholder</p>
-                            </div>
                             <div class="card-action">
-                                <a href="#">Kick</a>
-                                <a href="#">Ban</a>
-                                <i class="material-icons right">more_vert</i>
+                                <a name="{{this}}" onclick="kickPlayer(this)" href="#">Kick</a>
+                                <a name="{{this}}" onclick="banPlayer(this)" href="#">Ban</a>
+                                <a><i class="material-icons right">more_vert</i></a>
                             </div>
                         </div>
                     </div>
@@ -113,6 +108,7 @@
 
 <!--Import jQuery before materialize.js-->
 <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+<script type="text/javascript" src="/players.js"></script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.96.1/js/materialize.min.js"></script>
 

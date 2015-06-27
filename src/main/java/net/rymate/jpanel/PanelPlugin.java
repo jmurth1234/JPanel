@@ -5,12 +5,14 @@ import jdk.nashorn.internal.ir.RuntimeNode;
 import net.rymate.jpanel.Utils.Lag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
+import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.java_websocket.drafts.Draft_17;
 import spark.ModelAndView;
 import spark.template.handlebars.HandlebarsTemplateEngine;
@@ -162,7 +164,19 @@ public class PanelPlugin extends JavaPlugin {
 
         }, new HandlebarsTemplateEngine());
 
+        get("/player/:name/:action", (request, response) -> {
+            if (!sessions.contains(request.cookie("loggedin")))
+                return 0;
+
+            managePlayer(request.params(":name"), request.params(":action"));
+
+            return "OK";
+        });
+
         get("/stats", "application/json", (request, response) -> {
+            if (!sessions.contains(request.cookie("loggedin")))
+                return 0;
+
             Gson gson = new Gson();
 
             // Get RAM usage
@@ -220,6 +234,22 @@ public class PanelPlugin extends JavaPlugin {
             response.redirect("/");
             return 0;
         });
+    }
+
+    public synchronized void managePlayer(String name, String action) {
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (action.equalsIgnoreCase("kick"))
+                    getServer().getPlayer(name).kickPlayer("Kicked!");
+
+                if (action.equalsIgnoreCase("ban")) {
+                    getServer().getPlayer(name).setBanned(true);
+                    getServer().getPlayer(name).kickPlayer("Banned!");
+                }
+            }
+        }.runTask(this);
+
     }
 
     public Logger getServerLogger() {
