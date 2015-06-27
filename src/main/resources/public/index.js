@@ -39,7 +39,12 @@ function refresh() {
 }
 
 $(document).ready(function () {
-    var exampleSocket = new WebSocket("ws://" + document.domain + ":9003/");
+    var socket;
+    $.ajax({
+        url: "/wsport",
+        success: function (result) {
+            socket = new WebSocket("ws://" + document.domain + ":" + result + "/");
+        }});
 
     var term = $('#term').terminal(function (command, term) {
         if (command !== '') {
@@ -47,7 +52,7 @@ $(document).ready(function () {
                 var cmd = command
                 term.push(function(command) {
                     if (command.match(/y|yes/i)) {
-                        exampleSocket.send(cmd);
+                        socket.send(cmd);
                         term.pop();
                     } else if (command.match(/n|no/i)) {
                         term.pop();
@@ -56,7 +61,7 @@ $(document).ready(function () {
                     prompt: 'Are you sure? '
                 });
             } else {
-                exampleSocket.send(command);
+                socket.send(command);
             }
         }
     }, {
@@ -67,7 +72,7 @@ $(document).ready(function () {
         prompt: '> '
     });
 
-    exampleSocket.onmessage = function (event) {
+    socket.onmessage = function (event) {
         console.log(event.data);
         term.echo(event.data)
     }

@@ -43,6 +43,10 @@ public class PanelPlugin extends JavaPlugin {
     private ArrayList<String> sessions = new ArrayList();
     private FileConfiguration config;
 
+    private int httpPort = 4567;
+    private int socketPort = 9003;
+
+
     public void onDisable() {
         stop();
         try {
@@ -57,9 +61,6 @@ public class PanelPlugin extends JavaPlugin {
     }
 
     public void onEnable() {
-        // init spark server
-        setupSpark();
-        setupWS();
         Lag lag = Lag.getInstance();
 
         getServer().getScheduler().scheduleSyncRepeatingTask(this, lag, 100L, 1L);
@@ -67,13 +68,27 @@ public class PanelPlugin extends JavaPlugin {
         config = getConfig();
 
         users = new HashMap<>();
-        //Once again, you'll need to set up the HashMap and config somewhere else
-        for (String key : config.getConfigurationSection("users").getKeys(false))
-        {
-            users.put(key, config.getString("users." + key));
+
+        if (config.isConfigurationSection("users")) {
+            // load the users
+            for (String key : config.getConfigurationSection("users").getKeys(false)) {
+                users.put(key, config.getString("users." + key));
+            }
         }
 
-        System.out.println("PanelPlugin enabled!");
+        config.set("http-port", config.get("http-port", httpPort));
+        config.set("websocket-port", config.get("websocket-port", socketPort));
+
+        httpPort = config.getInt("http-port");
+        socketPort = config.getInt("websocket-port");
+
+        saveConfig();
+
+        // init spark server
+        setupSpark();
+        setupWS();
+
+        System.out.println("[JPanel] JPanel enabled!");
     }
 
     @Override
@@ -117,9 +132,8 @@ public class PanelPlugin extends JavaPlugin {
 
     private void setupWS() {
         System.out.println("Starting WebSocket server...");
-        int port = 9003;
         try {
-            socket = new ConsoleSocket( port, new Draft_17(), this );
+            socket = new ConsoleSocket( socketPort, new Draft_17(), this );
             socket.start();
         } catch (UnknownHostException e) {
             e.printStackTrace();
@@ -129,6 +143,7 @@ public class PanelPlugin extends JavaPlugin {
 
     private void setupSpark() {
         staticFileLocation("/public");
+        port(httpPort);
 
         get("/", (req, res) -> {
             Map map = new HashMap();
@@ -209,6 +224,8 @@ public class PanelPlugin extends JavaPlugin {
 
             return gson.toJson(map);
         });
+
+        get("/wsport", (request, response) -> socketPort );
 
         post("/login", (request, response) -> {
             String username = request.raw().getParameter("username");

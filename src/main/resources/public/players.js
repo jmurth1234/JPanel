@@ -1,7 +1,15 @@
 function kickPlayer(element) {
-    $.ajax({url: "/player/" + $(element).attr("name") + "/kick"});
+    var player = $(element).attr("name");
+    var confirmation = confirm("Are you sure you want to kick " + player + "?");
+    if (confirmation == true) {
+        $.ajax({url: "/player/" + player + "/kick"});
+    }
 }
 
 function banPlayer(element) {
-    $.ajax({url: "/player/" + $(element).attr("name") + "/ban"});
+    var player = $(element).attr("name");
+    var confirmation = confirm("Are you sure you want to ban " + player + "?");
+    if (confirmation == true) {
+        $.ajax({url: "/player/" + player + "/ban"});
+    }
 }
