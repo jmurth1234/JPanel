@@ -24,6 +24,17 @@
             width: 100% !important;
         }
 
+        .input-field {
+            position: relative;
+            margin-top: 0rem;
+            background-color: #000;
+            color: #fff;
+        }
+
+        #cmd_box {
+            height: 32px;
+        }
+
     </style>
 </head>
 
@@ -56,6 +67,16 @@
                 <h4>Terminal</h4>
 
                 <div id="term"></div>
+
+                <form id="cmd_form">
+                    <div class="input-field col s12">
+                        <i class="material-icons prefix">chevron_right</i>
+                        <input id="cmd_box"
+                               autocapitalize="off"
+                               autocorrect="off"
+                               placeholder="Execute a command..." type="text" class="validate">
+                    </div>
+                </form>
             </div>
             <div class="col s12 m4">
                 <h4>Server Stats</h4>

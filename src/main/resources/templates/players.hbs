@@ -71,18 +71,26 @@
                         <div class="card">
                             <div class="section valign-wrapper">
                                 <div class="col s2">
-                                    <img src="https://minotar.net/avatar/{{this}}" alt="" class="responsive-img">
+                                    <img src="https://minotar.net/avatar/{{this.name}}" alt="" class="responsive-img">
                                 </div>
                                 <div class="col s10">
                                     <span class="black-text">
-                                        {{this}}
+                                        {{this.name}}
                                     </span>
                                 </div>
                             </div>
+                            <ul class="collapsible" data-collapsible="accordion">
+                                <li>
+                                    <div class="collapsible-header">Details</div>
+                                    <div class="collapsible-body">
+                                        <p>Health: {{this.health}}.</p>
+                                    </div>
+                                </li>
+                            </ul>
 
                             <div class="card-action">
-                                <a name="{{this}}" onclick="kickPlayer(this)" href="#">Kick</a>
-                                <a name="{{this}}" onclick="banPlayer(this)" href="#">Ban</a>
+                                <a name="{{this.name}}" onclick="kickPlayer(this)" href="#">Kick</a>
+                                <a name="{{this.name}}" onclick="banPlayer(this)" href="#">Ban</a>
                             </div>
                             
                         </div>

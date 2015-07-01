@@ -163,10 +163,13 @@ public class PanelPlugin extends JavaPlugin {
             String version = getServer().getVersion();
             map.put("version", version);
 
-            List<String> names = new ArrayList<String>();
+            List<Map> names = new ArrayList<Map>();
 
             for (Player p : getServer().getOnlinePlayers()) {
-                names.add(p.getName());
+                Map playerMap = new HashMap();
+                playerMap.put("name", p.getName());
+                playerMap.put("health", p.getHealth());
+                names.add(playerMap);
             }
 
             map.put("players", names);

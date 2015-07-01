@@ -4,6 +4,7 @@ import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.Layout;
 import org.apache.logging.log4j.core.LogEvent;
 import org.bukkit.Bukkit;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.java_websocket.WebSocket;
 import org.java_websocket.drafts.Draft;
 import org.java_websocket.handshake.ClientHandshake;
@@ -53,7 +54,13 @@ public class ConsoleSocket extends WebSocketServer {
 
     @Override
     public void onMessage(WebSocket conn, String message) {
-        plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(), message);
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(), message);
+            }
+        }.runTask(plugin);
+
         //conn.send("Command recieved!");
     }
 
@@ -64,6 +71,10 @@ public class ConsoleSocket extends WebSocketServer {
 
     public void appendMessage(String message) {
         oldMsgs.add(message);
+        if (oldMsgs.size() > 1000) {
+            oldMsgs.remove(0);
+            oldMsgs.trimToSize();
+        }
         for (WebSocket socket : sockets) {
             socket.send(message);
         }
@@ -82,7 +93,9 @@ public class ConsoleSocket extends WebSocketServer {
         public void append(LogEvent event) {
             DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
             Date date = new Date();
-            appendMessage(dateFormat.format(date) + " [" + event.getLevel().toString() + "] " + event.getMessage().getFormattedMessage());
+            String message = event.getMessage().getFormattedMessage();
+            message = message.replaceAll("\\e\\[[\\d;]*[^\\d;]",""); // remove ansi characters as they don't work well
+            appendMessage(dateFormat.format(date) + " [" + event.getLevel().toString() + "] " + message);
         }
     }
 }

@@ -27,7 +27,7 @@ function refresh() {
                 textTPS.text("TPS: " +  Math.round(result.tps));
             },
             error: function (result) {
-                Materialize.toast('Connection failed! Click to retry, or wait 10 seconds.', 10000,'',function(){connected = true});
+                Materialize.toast('Connection failed!', 10000,'',function(){connected = true});
                 textCPU.text("CPU usage: ?");
                 textTPS.text("TPS: ?");
                 textRAM.text("RAM: ?");
@@ -44,12 +44,16 @@ $(document).ready(function () {
         url: "/wsport",
         success: function (result) {
             socket = new WebSocket("ws://" + document.domain + ":" + result + "/");
+
+            socket.onmessage = function (event) {
+                term.echo(event.data)
+            }
         }});
 
     var term = $('#term').terminal(function (command, term) {
         if (command !== '') {
             if ((command == 'stop') || (command == 'reload')) {
-                var cmd = command
+                var cmd = command;
                 term.push(function(command) {
                     if (command.match(/y|yes/i)) {
                         socket.send(cmd);
@@ -72,10 +76,25 @@ $(document).ready(function () {
         prompt: '> '
     });
 
-    socket.onmessage = function (event) {
-        console.log(event.data);
-        term.echo(event.data)
+    if (!jQuery.browser.mobile) {
+        $("#cmd_form").hide();
+    } else {
+        term.disable();
     }
+
+    $("#cmd_box").on('keypress', function (event) {
+        if(event.which === 13){
+            event.preventDefault()
+            socket.send($(this).val());
+            $(this).val("");
+        }
+    });
+
+    $("#cmd_form").submit(function(){
+        socket.send( $("#cmd_box").val());
+        $("#cmd_box").val("");
+        return false;
+    });
 
     window.setInterval(function(){
         refresh();
