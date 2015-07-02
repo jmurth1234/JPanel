@@ -40,7 +40,7 @@ public class PanelPlugin extends JavaPlugin {
     private static final org.apache.logging.log4j.core.Logger logger = (org.apache.logging.log4j.core.Logger) LogManager.getRootLogger();
     private ConsoleSocket socket;
     private HashMap<String, String> users;
-    private ArrayList<String> sessions = new ArrayList();
+    private HashMap<String, String> sessions = new HashMap<>();
     private FileConfiguration config;
 
     private int httpPort = 4567;
@@ -150,7 +150,7 @@ public class PanelPlugin extends JavaPlugin {
             String version = getServer().getVersion();
             map.put("version", version);
 
-            if (sessions.contains(req.cookie("loggedin"))) {
+            if (sessions.containsKey(req.cookie("loggedin"))) {
                 return new ModelAndView(map, "index.hbs");
             } else {
                 return new ModelAndView(map, "login.hbs");
@@ -174,7 +174,7 @@ public class PanelPlugin extends JavaPlugin {
 
             map.put("players", names);
 
-            if (sessions.contains(req.cookie("loggedin"))) {
+            if (sessions.containsKey(req.cookie("loggedin"))) {
                 return new ModelAndView(map, "players.hbs");
             } else {
                 return new ModelAndView(map, "login.hbs");
@@ -183,7 +183,7 @@ public class PanelPlugin extends JavaPlugin {
         }, new HandlebarsTemplateEngine());
 
         get("/player/:name/:action", (request, response) -> {
-            if (!sessions.contains(request.cookie("loggedin")))
+            if (!sessions.containsKey(request.cookie("loggedin")))
                 return 0;
 
             managePlayer(request.params(":name"), request.params(":action"));
@@ -192,7 +192,7 @@ public class PanelPlugin extends JavaPlugin {
         });
 
         get("/stats", "application/json", (request, response) -> {
-            if (!sessions.contains(request.cookie("loggedin")))
+            if (!sessions.containsKey(request.cookie("loggedin")))
                 return 0;
 
             Gson gson = new Gson();
@@ -247,7 +247,7 @@ public class PanelPlugin extends JavaPlugin {
 
             if (Objects.equals(users.get(username), sb.toString())) {
                 UUID sessionId = UUID.randomUUID();
-                sessions.add(sessionId.toString());
+                sessions.put(sessionId.toString(), username);
                 response.cookie("loggedin", sessionId.toString(), 3600);
             }
 
@@ -270,6 +270,10 @@ public class PanelPlugin extends JavaPlugin {
             }
         }.runTask(this);
 
+    }
+
+    public HashMap getSessions() {
+        return sessions;
     }
 
     public Logger getServerLogger() {

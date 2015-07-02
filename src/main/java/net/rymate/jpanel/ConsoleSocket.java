@@ -1,5 +1,6 @@
 package net.rymate.jpanel;
 
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.Layout;
 import org.apache.logging.log4j.core.LogEvent;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.nio.ByteBuffer;
 import java.util.Date;
+import java.util.HashMap;
 
 import org.apache.logging.log4j.core.appender.AbstractAppender;
 
@@ -30,7 +32,7 @@ import org.apache.logging.log4j.core.appender.AbstractAppender;
 public class ConsoleSocket extends WebSocketServer {
     private PanelPlugin plugin;
     private ArrayList<String> oldMsgs = new ArrayList();
-    private ArrayList<WebSocket> sockets = new ArrayList();
+    private HashMap<WebSocket, String> sockets = new HashMap<>();
 
 
     public ConsoleSocket(int port, Draft d, PanelPlugin panelPlugin) throws UnknownHostException {
@@ -41,10 +43,7 @@ public class ConsoleSocket extends WebSocketServer {
 
     @Override
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
-        sockets.add(conn);
-        for (String message : oldMsgs) {
-            conn.send(message);
-        }
+        conn.send("Connected!");
     }
 
     @Override
@@ -54,12 +53,29 @@ public class ConsoleSocket extends WebSocketServer {
 
     @Override
     public void onMessage(WebSocket conn, String message) {
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(), message);
+        if (message.startsWith("AUTH")) {
+            String token = message.split(" ")[1];
+            if (plugin.getSessions().containsKey(token)) {
+                sockets.put(conn, (String) plugin.getSessions().get(token));
+                for (String msg : oldMsgs) {
+                    conn.send(msg);
+                }
+                plugin.getServerLogger().log(Level.INFO, "Console user " + sockets.get(conn) + " logged in!");
+            } else {
+                plugin.getServerLogger().log(Level.INFO, "Console user " + sockets.get(conn) + " failed to log in!");
+
+                conn.close(0, "AUTH CODE INCORRECT, PLEASE LOG IN");
             }
-        }.runTask(plugin);
+        } else {
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(), message);
+                }
+            }.runTask(plugin);
+
+            plugin.getServerLogger().log(Level.INFO, "Console user " + sockets.get(conn) + " ran the command " + message);
+        }
 
         //conn.send("Command recieved!");
     }
@@ -75,7 +91,7 @@ public class ConsoleSocket extends WebSocketServer {
             oldMsgs.remove(0);
             oldMsgs.trimToSize();
         }
-        for (WebSocket socket : sockets) {
+        for (WebSocket socket : sockets.keySet()) {
             socket.send(message);
         }
     }
