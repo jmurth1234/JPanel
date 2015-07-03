@@ -174,10 +174,17 @@ public class PanelPlugin extends JavaPlugin {
 
             List<Map> names = new ArrayList<Map>();
 
-            for (Player p : getServer().getOnlinePlayers()) {
+//            for (Player p : getServer().getOnlinePlayers()) {
+//                Map playerMap = new HashMap();
+//                playerMap.put("name", p.getName());
+//                playerMap.put("health", p.getHealth());
+//                names.add(playerMap);
+//            }
+
+            for (int i = 0; i < 10; i++) {
                 Map playerMap = new HashMap();
-                playerMap.put("name", p.getName());
-                playerMap.put("health", p.getHealth());
+                playerMap.put("name", "player" + i);
+                playerMap.put("health", 18);
                 names.add(playerMap);
             }
 
