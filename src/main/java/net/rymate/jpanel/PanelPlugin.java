@@ -150,6 +150,11 @@ public class PanelPlugin extends JavaPlugin {
             String version = getServer().getVersion();
             map.put("version", version);
 
+            if (req.cookie("theme") != null) {
+                if (req.cookie("theme").equals("dark"))
+                    map.put("dark", true);
+            }
+
             if (sessions.containsKey(req.cookie("loggedin"))) {
                 return new ModelAndView(map, "index.hbs");
             } else {
@@ -161,6 +166,10 @@ public class PanelPlugin extends JavaPlugin {
         get("/players", (req, res) -> {
             Map map = new HashMap();
             String version = getServer().getVersion();
+            if (req.cookie("theme") != null) {
+                if (req.cookie("theme").equals("dark"))
+                    map.put("dark", true);
+            }
             map.put("version", version);
 
             List<Map> names = new ArrayList<Map>();
@@ -254,6 +263,19 @@ public class PanelPlugin extends JavaPlugin {
             response.redirect("/");
             return 0;
         });
+
+        get("/switchtheme", (request, response) -> {
+            if (request.cookie("theme") == null) {
+                response.cookie("theme", "dark");
+            } else if (request.cookie("theme").equals("dark")) {
+                response.cookie("theme", "light");
+            } else {
+                response.cookie("theme", "dark");
+            }
+            response.redirect("/");
+            return 0;
+        });
+
     }
 
     public synchronized void managePlayer(String name, String action) {
