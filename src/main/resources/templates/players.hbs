@@ -24,7 +24,9 @@
 
         .container {
             width: 100% !important;
+            max-width: 960px;
         }
+
 
         .valign-wrapper {
             display: -webkit-box; /* OLD - iOS 6-, Safari 3.1-6, BB7 */
@@ -37,7 +39,14 @@
 
         .row {
             margin-bottom: 0px;
+            width: auto;
+            margin: 0 auto;
         }
+
+        .grid-item {
+            width: 320px;
+        }
+
 
     </style>
 </head>
@@ -68,38 +77,38 @@
 <main>
     <div class="container">
         <div class="row">
-            <div class="row">
-                {{#each players}}
-                    <div class="col s12 m6 l4">
-                        <div class="card">
-                            <div class="section valign-wrapper">
-                                <div class="col s2">
-                                    <img src="https://minotar.net/avatar/{{this.name}}" alt="" class="responsive-img">
-                                </div>
-                                <div class="col s10">
-                                    <span class="black-text">
-                                        {{this.name}}
-                                    </span>
-                                </div>
-                            </div>
-                            <ul class="collapsible" data-collapsible="accordion">
-                                <li>
-                                    <div class="collapsible-header">Details</div>
-                                    <div class="collapsible-body">
-                                        <p>Health: {{this.health}}.</p>
-                                    </div>
-                                </li>
-                            </ul>
+            <div class="grid">
+            {{#each players}}
+                <div class="grid-item">
 
-                            <div class="card-action">
-                                <a name="{{this.name}}" onclick="kickPlayer(this)" href="#">Kick</a>
-                                <a name="{{this.name}}" onclick="banPlayer(this)" href="#">Ban</a>
+                    <div class="card">
+                        <div class="section valign-wrapper">
+                            <div class="col s2">
+                                <img src="https://minotar.net/avatar/{{this.name}}" alt="" class="responsive-img">
                             </div>
-                            
+                            <div class="col s10">
+                            <span class="black-text">
+                                {{this.name}}
+                            </span>
+                            </div>
+                        </div>
+                        <ul class="gridcollapsible" data-collapsible="accordion">
+                            <li>
+                                <div class="collapsible-header">Details</div>
+                                <div class="collapsible-body">
+                                    <p>Health: {{this.health}}.</p>
+                                </div>
+                            </li>
+                        </ul>
+
+                        <div class="card-action">
+                            <a name="{{this.name}}" onclick="kickPlayer(this)" href="#">Kick</a>
+                            <a name="{{this.name}}" onclick="banPlayer(this)" href="#">Ban</a>
                         </div>
                     </div>
-                {{/each}}
 
+                </div>
+            {{/each}}
             </div>
 
         </div>
@@ -119,14 +128,12 @@
 
 <!--Import jQuery before materialize.js-->
 <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
-<script type="text/javascript" src="/players.js"></script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.96.1/js/materialize.min.js"></script>
 
-<script>
-    $(document).ready(function () {
-        $(".button-collapse").sideNav();
-    });
-</script>
+<script type="text/javascript" src="/masonry.js"></script>
+
+<script type="text/javascript" src="/players.js"></script>
+
 </body>
 </html>

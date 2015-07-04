@@ -1,6 +1,7 @@
 package net.rymate.jpanel;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import jdk.nashorn.internal.ir.RuntimeNode;
 import net.rymate.jpanel.Utils.Lag;
 import org.apache.logging.log4j.LogManager;
@@ -19,6 +20,7 @@ import spark.template.handlebars.HandlebarsTemplateEngine;
 
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.http.Part;
+import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
@@ -174,19 +176,19 @@ public class PanelPlugin extends JavaPlugin {
 
             List<Map> names = new ArrayList<Map>();
 
-//            for (Player p : getServer().getOnlinePlayers()) {
-//                Map playerMap = new HashMap();
-//                playerMap.put("name", p.getName());
-//                playerMap.put("health", p.getHealth());
-//                names.add(playerMap);
-//            }
-
-            for (int i = 0; i < 10; i++) {
+            for (Player p : getServer().getOnlinePlayers()) {
                 Map playerMap = new HashMap();
-                playerMap.put("name", "player" + i);
-                playerMap.put("health", 18);
+                playerMap.put("name", p.getName());
+                playerMap.put("health", p.getHealth());
                 names.add(playerMap);
             }
+
+//            for (int i = 0; i < 10; i++) {
+//                Map playerMap = new HashMap();
+//                playerMap.put("name", "player" + i);
+//                playerMap.put("health", 18);
+//                names.add(playerMap);
+//            }
 
             map.put("players", names);
 
@@ -227,11 +229,7 @@ public class PanelPlugin extends JavaPlugin {
             int processors = os.getAvailableProcessors();
 
             double usage = os.getSystemLoadAverage() / processors;
-
-            if (usage < 0.0D) {
-                return "0";
-            }
-
+            
             long cpuUsage = Math.round(usage * 100.0D);
 
             // shove in a hashmap
@@ -281,6 +279,43 @@ public class PanelPlugin extends JavaPlugin {
             }
             response.redirect("/");
             return 0;
+        });
+
+        get("/file/*", (request, response) -> {
+            if (!sessions.containsKey(request.cookie("loggedin")))
+                return 0;
+
+            String splat = "";
+            for (String file : request.splat()) {
+                splat = splat + file;
+            }
+            splat = splat + "/";
+
+            File file = new File(splat);
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+
+            Map map = new HashMap();
+            ArrayList<String> folders = new ArrayList<String>();
+            ArrayList<String> files = new ArrayList<String>();
+
+            if (!file.exists()) {
+                return 0;
+            }
+
+            if (file.isDirectory()) {
+                for (File fileEntry : file.listFiles()) {
+                    if (fileEntry.isDirectory()) {
+                        folders.add(fileEntry.getName());
+                    } else {
+                        files.add(fileEntry.getName());
+                    }
+                }
+            }
+
+            map.put("folders", folders);
+            map.put("files", files);
+
+            return gson.toJson(map);
         });
 
     }
