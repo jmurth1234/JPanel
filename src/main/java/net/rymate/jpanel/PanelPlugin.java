@@ -25,6 +25,9 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
 import java.net.UnknownHostException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.MessageDigest;
 import java.text.NumberFormat;
 import java.util.*;
@@ -165,6 +168,24 @@ public class PanelPlugin extends JavaPlugin {
 
         }, new HandlebarsTemplateEngine());
 
+        get("/files", (req, res) -> {
+            Map map = new HashMap();
+            String version = getServer().getVersion();
+            map.put("version", version);
+
+            if (req.cookie("theme") != null) {
+                if (req.cookie("theme").equals("dark"))
+                    map.put("dark", true);
+            }
+
+            if (sessions.containsKey(req.cookie("loggedin"))) {
+                return new ModelAndView(map, "file-manager.hbs");
+            } else {
+                return new ModelAndView(map, "login.hbs");
+            }
+
+        }, new HandlebarsTemplateEngine());
+
         get("/players", (req, res) -> {
             Map map = new HashMap();
             String version = getServer().getVersion();
@@ -229,7 +250,7 @@ public class PanelPlugin extends JavaPlugin {
             int processors = os.getAvailableProcessors();
 
             double usage = os.getSystemLoadAverage() / processors;
-            
+
             long cpuUsage = Math.round(usage * 100.0D);
 
             // shove in a hashmap
@@ -291,7 +312,7 @@ public class PanelPlugin extends JavaPlugin {
             }
             splat = splat + "/";
 
-            File file = new File(splat);
+            File file = new File(new File(".").getAbsolutePath() + "/" + splat);
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
             Map map = new HashMap();
@@ -299,7 +320,7 @@ public class PanelPlugin extends JavaPlugin {
             ArrayList<String> files = new ArrayList<String>();
 
             if (!file.exists()) {
-                return 0;
+                return file;
             }
 
             if (file.isDirectory()) {
@@ -310,6 +331,9 @@ public class PanelPlugin extends JavaPlugin {
                         files.add(fileEntry.getName());
                     }
                 }
+            } else {
+                byte[] encoded = Files.readAllBytes(Paths.get(file.getAbsolutePath()));
+                return new String(encoded, Charset.defaultCharset());
             }
 
             map.put("folders", folders);
