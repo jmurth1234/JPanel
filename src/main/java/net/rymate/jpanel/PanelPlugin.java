@@ -22,6 +22,7 @@ import javax.servlet.MultipartConfigElement;
 import javax.servlet.http.Part;
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
 import java.net.UnknownHostException;
@@ -44,7 +45,7 @@ public class PanelPlugin extends JavaPlugin {
     private static final java.util.logging.Logger log = java.util.logging.Logger.getLogger("Minecraft-Server");
     private static final org.apache.logging.log4j.core.Logger logger = (org.apache.logging.log4j.core.Logger) LogManager.getRootLogger();
     private ConsoleSocket socket;
-    private HashMap<String, String> users;
+    private HashMap<String, PanelUser> users;
     private HashMap<String, String> sessions = new HashMap<>();
     private FileConfiguration config;
 
@@ -77,7 +78,7 @@ public class PanelPlugin extends JavaPlugin {
         if (config.isConfigurationSection("users")) {
             // load the users
             for (String key : config.getConfigurationSection("users").getKeys(false)) {
-                users.put(key, config.getString("users." + key));
+                users.put(key, (PanelUser) config.get("users." + key));
             }
         }
 
@@ -121,7 +122,9 @@ public class PanelPlugin extends JavaPlugin {
                     sb.append(Integer.toString((byteData[i] & 0xff) + 0x100, 16).substring(1));
                 }
 
-                users.put(args[0], sb.toString());
+                PanelUser user = new PanelUser(sb.toString(), false);
+
+                users.put(args[0], user);
             } catch (Exception e) {
                 e.printStackTrace();
                 return true;
@@ -280,7 +283,7 @@ public class PanelPlugin extends JavaPlugin {
                 sb.append(Integer.toString((byteData[i] & 0xff) + 0x100, 16).substring(1));
             }
 
-            if (Objects.equals(users.get(username), sb.toString())) {
+            if (Objects.equals(users.get(username).password, sb.toString())) {
                 UUID sessionId = UUID.randomUUID();
                 sessions.put(sessionId.toString(), username);
                 response.cookie("loggedin", sessionId.toString(), 3600);
@@ -342,6 +345,38 @@ public class PanelPlugin extends JavaPlugin {
             return gson.toJson(map);
         });
 
+        post("/file/*", (request, response) -> {
+            if (!sessions.containsKey(request.cookie("loggedin")))
+                return 0;
+
+            if (!users.get(sessions.get(request.cookie("loggedin"))).canEditFiles)
+                return 0;
+
+            String splat = "";
+            for (String file : request.splat()) {
+                splat = splat + file;
+            }
+            splat = splat + "/";
+
+            File file = new File(new File(".").getAbsolutePath() + "/" + splat);
+
+            if (!file.exists()) {
+                return false;
+            }
+
+            if (!file.isDirectory()) {
+                String text = request.body();
+                file.delete();
+                file.createNewFile();
+                PrintWriter out = new PrintWriter(file);
+                out.print(text);
+                out.close();
+            } else {
+                return false;
+            }
+
+            return true;
+        });
     }
 
     public synchronized void managePlayer(String name, String action) {

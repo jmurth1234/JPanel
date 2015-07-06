@@ -1,6 +1,8 @@
 var currentDir = "";
+var editor;
 
 $(document).ready(function () {
+    $("#save-btn").hide();
     $.ajax({
         url: "/file/",
         success: function (result) {
@@ -49,16 +51,27 @@ function openFolder(element) {
 
 function openFile(element) {
     file = $(element).text();
+    $("#save-btn").show();
     currentFile = currentDir + "/" + file;
 
     console.log(currentFile);
     $.ajax({
         url: "/file/" + currentFile,
         success: function (result) {
-            var editor = ace.edit("editor");
+            editor = ace.edit("editor");
             editor.setTheme("ace/theme/twilight");
             editor.getSession().setMode("ace/mode/yaml");
             editor.setValue(result);
             editor.gotoLine(1);
         }});
+}
+
+function saveFile() {
+    $.post( "/file/" + currentFile, editor.getValue(), function(result) {
+        if (result == 0) {
+            alert( "You're not allowed to edit files!" );
+        } else {
+            alert( "File successfully saved!" );
+        }
+    });
 }
