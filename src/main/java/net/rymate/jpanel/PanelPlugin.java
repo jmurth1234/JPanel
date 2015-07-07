@@ -2,14 +2,11 @@ package net.rymate.jpanel;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import jdk.nashorn.internal.ir.RuntimeNode;
 import net.rymate.jpanel.Utils.Lag;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
-import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -18,8 +15,6 @@ import org.java_websocket.drafts.Draft_17;
 import spark.ModelAndView;
 import spark.template.handlebars.HandlebarsTemplateEngine;
 
-import javax.servlet.MultipartConfigElement;
-import javax.servlet.http.Part;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -45,12 +40,11 @@ public class PanelPlugin extends JavaPlugin {
     private static final java.util.logging.Logger log = java.util.logging.Logger.getLogger("Minecraft-Server");
     private static final org.apache.logging.log4j.core.Logger logger = (org.apache.logging.log4j.core.Logger) LogManager.getRootLogger();
     private ConsoleSocket socket;
-    private HashMap<String, PanelUser> users;
-    private HashMap<String, String> sessions = new HashMap<>();
     private FileConfiguration config;
 
     private int httpPort = 4567;
     private int socketPort = 9003;
+    private PanelSessions sessions;
 
 
     public void onDisable() {
@@ -63,22 +57,24 @@ public class PanelPlugin extends JavaPlugin {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        users.clear();
+        sessions.destroy();
     }
 
     public void onEnable() {
         Lag lag = Lag.getInstance();
+        sessions = PanelSessions.getInstance();
 
         getServer().getScheduler().scheduleSyncRepeatingTask(this, lag, 100L, 1L);
 
         config = getConfig();
 
-        users = new HashMap<>();
-
         if (config.isConfigurationSection("users")) {
             // load the users
             for (String key : config.getConfigurationSection("users").getKeys(false)) {
-                users.put(key, (PanelUser) config.get("users." + key));
+                String password = config.getString("users." + key + ".password");
+                boolean canEditFiles = config.getBoolean("users." + key + ".canEditFiles");
+                PanelUser user = new PanelUser(password, canEditFiles);
+                sessions.addUser(key, user);
             }
         }
 
@@ -88,7 +84,7 @@ public class PanelPlugin extends JavaPlugin {
         httpPort = config.getInt("http-port");
         socketPort = config.getInt("websocket-port");
 
-        saveConfig();
+        //saveConfig();
 
         // init spark server
         setupSpark();
@@ -124,14 +120,16 @@ public class PanelPlugin extends JavaPlugin {
 
                 PanelUser user = new PanelUser(sb.toString(), false);
 
-                users.put(args[0], user);
+                sessions.addUser(args[0], user);
+
+                config.set("users." + args[0] + ".password", user.password);
+                config.set("users." + args[0] + ".canEditFiles", user.canEditFiles);
+                saveConfig();
+
             } catch (Exception e) {
                 e.printStackTrace();
                 return true;
             }
-
-            config.set("users", users);
-            saveConfig();
 
             return true;
         }
@@ -163,7 +161,7 @@ public class PanelPlugin extends JavaPlugin {
                     map.put("dark", true);
             }
 
-            if (sessions.containsKey(req.cookie("loggedin"))) {
+            if (sessions.isLoggedIn(req.cookie("loggedin"))) {
                 return new ModelAndView(map, "index.hbs");
             } else {
                 return new ModelAndView(map, "login.hbs");
@@ -181,7 +179,7 @@ public class PanelPlugin extends JavaPlugin {
                     map.put("dark", true);
             }
 
-            if (sessions.containsKey(req.cookie("loggedin"))) {
+            if (sessions.isLoggedIn(req.cookie("loggedin"))) {
                 return new ModelAndView(map, "file-manager.hbs");
             } else {
                 return new ModelAndView(map, "login.hbs");
@@ -216,7 +214,7 @@ public class PanelPlugin extends JavaPlugin {
 
             map.put("players", names);
 
-            if (sessions.containsKey(req.cookie("loggedin"))) {
+            if (sessions.isLoggedIn(req.cookie("loggedin"))) {
                 return new ModelAndView(map, "players.hbs");
             } else {
                 return new ModelAndView(map, "login.hbs");
@@ -225,7 +223,7 @@ public class PanelPlugin extends JavaPlugin {
         }, new HandlebarsTemplateEngine());
 
         get("/player/:name/:action", (request, response) -> {
-            if (!sessions.containsKey(request.cookie("loggedin")))
+            if (!sessions.isLoggedIn(request.cookie("loggedin")))
                 return 0;
 
             managePlayer(request.params(":name"), request.params(":action"));
@@ -234,7 +232,7 @@ public class PanelPlugin extends JavaPlugin {
         });
 
         get("/stats", "application/json", (request, response) -> {
-            if (!sessions.containsKey(request.cookie("loggedin")))
+            if (!sessions.isLoggedIn(request.cookie("loggedin")))
                 return 0;
 
             Gson gson = new Gson();
@@ -283,9 +281,9 @@ public class PanelPlugin extends JavaPlugin {
                 sb.append(Integer.toString((byteData[i] & 0xff) + 0x100, 16).substring(1));
             }
 
-            if (Objects.equals(users.get(username).password, sb.toString())) {
+            if (Objects.equals(sessions.getPasswordForUser(username), sb.toString())) {
                 UUID sessionId = UUID.randomUUID();
-                sessions.put(sessionId.toString(), username);
+                sessions.addSession(sessionId.toString(), username);
                 response.cookie("loggedin", sessionId.toString(), 3600);
             }
 
@@ -306,7 +304,7 @@ public class PanelPlugin extends JavaPlugin {
         });
 
         get("/file/*", (request, response) -> {
-            if (!sessions.containsKey(request.cookie("loggedin")))
+            if (!sessions.isLoggedIn(request.cookie("loggedin")))
                 return 0;
 
             String splat = "";
@@ -346,10 +344,10 @@ public class PanelPlugin extends JavaPlugin {
         });
 
         post("/file/*", (request, response) -> {
-            if (!sessions.containsKey(request.cookie("loggedin")))
+            if (!sessions.isLoggedIn(request.cookie("loggedin")))
                 return 0;
 
-            if (!users.get(sessions.get(request.cookie("loggedin"))).canEditFiles)
+            if (sessions.getAuthedUser(request.cookie("loggedin")).canEditFiles)
                 return 0;
 
             String splat = "";
@@ -393,10 +391,6 @@ public class PanelPlugin extends JavaPlugin {
             }
         }.runTask(this);
 
-    }
-
-    public HashMap getSessions() {
-        return sessions;
     }
 
     public Logger getServerLogger() {
