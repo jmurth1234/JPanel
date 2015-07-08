@@ -3,6 +3,9 @@ package net.rymate.jpanel;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.rymate.jpanel.Utils.Lag;
+import net.rymate.jpanel.getters.IndexGetter;
+import net.rymate.jpanel.getters.PlayersGetter;
+import net.rymate.jpanel.getters.StatsGetter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 import org.bukkit.command.Command;
@@ -87,7 +90,19 @@ public class PanelPlugin extends JavaPlugin {
         //saveConfig();
 
         // init spark server
-        setupSpark();
+        //setupSpark();
+
+        staticFileLocation("/public");
+        port(httpPort);
+
+        // pages (temporary until the page manager is implemented
+        new IndexGetter("/", "index.hbs", this);
+        new PlayersGetter("/players", "players.hbs", this);
+
+        // text only paths
+        new StatsGetter("/stats");
+        new LoginPost("/login");
+
         setupWS();
 
         System.out.println("[JPanel] JPanel enabled!");
@@ -148,9 +163,6 @@ public class PanelPlugin extends JavaPlugin {
     }
 
     private void setupSpark() {
-        staticFileLocation("/public");
-        port(httpPort);
-
         get("/", (req, res) -> {
             Map map = new HashMap();
             String version = getServer().getVersion();
@@ -395,5 +407,9 @@ public class PanelPlugin extends JavaPlugin {
 
     public Logger getServerLogger() {
         return logger;
+    }
+
+    public int getWebSocketPort() {
+        return socketPort;
     }
 }
