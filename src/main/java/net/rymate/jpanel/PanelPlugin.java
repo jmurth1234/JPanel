@@ -104,8 +104,10 @@ public class PanelPlugin extends JavaPlugin {
         // text only paths
         new StatsGetter("/stats");
         new LoginPost("/login");
+        new FilePost("/file/*");
         new SwitchThemeGetter("/switchtheme");
         new FileGetter("/file/*");
+        new PlayerManagerPath("/player/:name/:action", this);
 
 
         setupWS();
@@ -165,51 +167,6 @@ public class PanelPlugin extends JavaPlugin {
             e.printStackTrace();
         }
         System.out.println("Started WebSocket server!");
-    }
-
-    private void setupSpark() {
-
-        get("/player/:name/:action", (request, response) -> {
-            if (!sessions.isLoggedIn(request.cookie("loggedin")))
-                return 0;
-
-            managePlayer(request.params(":name"), request.params(":action"));
-
-            return "OK";
-        });
-
-        post("/file/*", (request, response) -> {
-            if (!sessions.isLoggedIn(request.cookie("loggedin")))
-                return 0;
-
-            if (sessions.getAuthedUser(request.cookie("loggedin")).canEditFiles)
-                return 0;
-
-            String splat = "";
-            for (String file : request.splat()) {
-                splat = splat + file;
-            }
-            splat = splat + "/";
-
-            File file = new File(new File(".").getAbsolutePath() + "/" + splat);
-
-            if (!file.exists()) {
-                return false;
-            }
-
-            if (!file.isDirectory()) {
-                String text = request.body();
-                file.delete();
-                file.createNewFile();
-                PrintWriter out = new PrintWriter(file);
-                out.print(text);
-                out.close();
-            } else {
-                return false;
-            }
-
-            return true;
-        });
     }
 
     public synchronized void managePlayer(String name, String action) {
