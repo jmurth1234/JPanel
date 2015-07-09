@@ -1,5 +1,6 @@
-package net.rymate.jpanel;
+package net.rymate.jpanel.getters;
 
+import net.rymate.jpanel.PanelPlugin;
 import net.rymate.jpanel.getters.GetterBase;
 
 /**

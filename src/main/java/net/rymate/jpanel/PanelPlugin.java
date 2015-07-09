@@ -1,12 +1,10 @@
 package net.rymate.jpanel;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import net.rymate.jpanel.Utils.Lag;
-import net.rymate.jpanel.getters.IndexGetter;
-import net.rymate.jpanel.getters.PlayersGetter;
-import net.rymate.jpanel.getters.StatsGetter;
-import net.rymate.jpanel.getters.SwitchThemeGetter;
+import net.rymate.jpanel.getters.*;
+import net.rymate.jpanel.posters.FilePost;
+import net.rymate.jpanel.posters.LoginPost;
+import net.rymate.jpanel.getters.PlayerManagerPath;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 import org.bukkit.command.Command;
@@ -16,21 +14,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.java_websocket.drafts.Draft_17;
-import spark.ModelAndView;
-import spark.template.handlebars.HandlebarsTemplateEngine;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.lang.management.ManagementFactory;
-import java.lang.management.OperatingSystemMXBean;
 import java.net.UnknownHostException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.security.MessageDigest;
-import java.text.NumberFormat;
-import java.util.*;
 
 import static spark.Spark.*;
 

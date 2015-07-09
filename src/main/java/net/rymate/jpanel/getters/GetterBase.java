@@ -25,7 +25,7 @@ public abstract class GetterBase {
 
     public GetterBase(String path, PanelPlugin plugin) {
         sessions = PanelSessions.getInstance();
-        get(path, this::getText);
+        get(path, (request, response) -> getText(request, response));
     }
 
     public GetterBase(String path, String template, PanelPlugin plugin) {
@@ -69,5 +69,8 @@ public abstract class GetterBase {
 
     public PanelPlugin getPlugin() {
         return plugin;
+    }
+    public void setPlugin(PanelPlugin plugin) {
+        this.plugin = plugin;
     }
 }

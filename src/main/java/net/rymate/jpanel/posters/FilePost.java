@@ -1,4 +1,4 @@
-package net.rymate.jpanel;
+package net.rymate.jpanel.posters;
 
 import spark.Request;
 import spark.Response;

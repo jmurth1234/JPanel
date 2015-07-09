@@ -1,5 +1,6 @@
-package net.rymate.jpanel;
+package net.rymate.jpanel.posters;
 
+import net.rymate.jpanel.PanelSessions;
 import spark.ModelAndView;
 import spark.Request;
 import spark.Response;

@@ -1,5 +1,6 @@
-package net.rymate.jpanel;
+package net.rymate.jpanel.getters;
 
+import net.rymate.jpanel.PanelPlugin;
 import net.rymate.jpanel.getters.GetterBase;
 import spark.Request;
 import spark.Response;
@@ -7,9 +8,10 @@ import spark.Response;
 /**
  * Created by Ryan on 09/07/2015.
  */
-public class PlayerManagerPath extends GetterBase{
+public class PlayerManagerPath extends GetterBase {
     public PlayerManagerPath(String path, PanelPlugin plugin) {
         super(path, plugin);
+        setPlugin(plugin);
     }
 
     @Override

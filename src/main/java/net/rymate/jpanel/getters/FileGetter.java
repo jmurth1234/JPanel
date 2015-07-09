@@ -1,4 +1,4 @@
-package net.rymate.jpanel;
+package net.rymate.jpanel.getters;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
