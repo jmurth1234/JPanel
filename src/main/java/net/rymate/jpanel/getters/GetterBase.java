@@ -44,8 +44,8 @@ public abstract class GetterBase {
         getTemplateMap().put("version", version);
 
         if (request.cookie("theme") != null) {
-            if (request.cookie("theme").equals("dark"))
-                getTemplateMap().put("dark", true);
+            boolean dark = request.cookie("theme").equals("dark");
+            getTemplateMap().put("dark", dark);
         }
 
         if (sessions.isLoggedIn(request.cookie("loggedin"))) {

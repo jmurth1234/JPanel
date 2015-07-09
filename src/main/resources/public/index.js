@@ -1,16 +1,5 @@
 var connected = true;
 
-function getCookie(cname) {
-    var name = cname + "=";
-    var ca = document.cookie.split(';');
-    for(var i=0; i<ca.length; i++) {
-        var c = ca[i];
-        while (c.charAt(0)==' ') c = c.substring(1);
-        if (c.indexOf(name) == 0) return c.substring(name.length,c.length);
-    }
-    return "";
-}
-
 function refresh() {
     var progressCPU = $("#cpu");
     var textCPU = $("#cpu-text");
@@ -56,10 +45,6 @@ $(document).ready(function () {
         url: "/wsport",
         success: function (result) {
             socket = new WebSocket("ws://" + document.domain + ":" + result + "/");
-
-            socket.onopen = function (event) {
-                socket.send("AUTH " + getCookie("loggedin"));
-            };
 
             socket.onmessage = function (event) {
                 term.echo(event.data)

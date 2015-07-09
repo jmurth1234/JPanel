@@ -6,6 +6,7 @@ import net.rymate.jpanel.Utils.Lag;
 import net.rymate.jpanel.getters.IndexGetter;
 import net.rymate.jpanel.getters.PlayersGetter;
 import net.rymate.jpanel.getters.StatsGetter;
+import net.rymate.jpanel.getters.SwitchThemeGetter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 import org.bukkit.command.Command;
@@ -98,10 +99,14 @@ public class PanelPlugin extends JavaPlugin {
         // pages (temporary until the page manager is implemented
         new IndexGetter("/", "index.hbs", this);
         new PlayersGetter("/players", "players.hbs", this);
+        new FilesPageGetter("/files", "file-manager.hbs", this);
 
         // text only paths
         new StatsGetter("/stats");
         new LoginPost("/login");
+        new SwitchThemeGetter("/switchtheme");
+        new FileGetter("/file/*");
+
 
         setupWS();
 
@@ -163,76 +168,6 @@ public class PanelPlugin extends JavaPlugin {
     }
 
     private void setupSpark() {
-        get("/", (req, res) -> {
-            Map map = new HashMap();
-            String version = getServer().getVersion();
-            map.put("version", version);
-
-            if (req.cookie("theme") != null) {
-                if (req.cookie("theme").equals("dark"))
-                    map.put("dark", true);
-            }
-
-            if (sessions.isLoggedIn(req.cookie("loggedin"))) {
-                return new ModelAndView(map, "index.hbs");
-            } else {
-                return new ModelAndView(map, "login.hbs");
-            }
-
-        }, new HandlebarsTemplateEngine());
-
-        get("/files", (req, res) -> {
-            Map map = new HashMap();
-            String version = getServer().getVersion();
-            map.put("version", version);
-
-            if (req.cookie("theme") != null) {
-                if (req.cookie("theme").equals("dark"))
-                    map.put("dark", true);
-            }
-
-            if (sessions.isLoggedIn(req.cookie("loggedin"))) {
-                return new ModelAndView(map, "file-manager.hbs");
-            } else {
-                return new ModelAndView(map, "login.hbs");
-            }
-
-        }, new HandlebarsTemplateEngine());
-
-        get("/players", (req, res) -> {
-            Map map = new HashMap();
-            String version = getServer().getVersion();
-            if (req.cookie("theme") != null) {
-                if (req.cookie("theme").equals("dark"))
-                    map.put("dark", true);
-            }
-            map.put("version", version);
-
-            List<Map> names = new ArrayList<Map>();
-
-            for (Player p : getServer().getOnlinePlayers()) {
-                Map playerMap = new HashMap();
-                playerMap.put("name", p.getName());
-                playerMap.put("health", p.getHealth());
-                names.add(playerMap);
-            }
-
-//            for (int i = 0; i < 10; i++) {
-//                Map playerMap = new HashMap();
-//                playerMap.put("name", "player" + i);
-//                playerMap.put("health", 18);
-//                names.add(playerMap);
-//            }
-
-            map.put("players", names);
-
-            if (sessions.isLoggedIn(req.cookie("loggedin"))) {
-                return new ModelAndView(map, "players.hbs");
-            } else {
-                return new ModelAndView(map, "login.hbs");
-            }
-
-        }, new HandlebarsTemplateEngine());
 
         get("/player/:name/:action", (request, response) -> {
             if (!sessions.isLoggedIn(request.cookie("loggedin")))
@@ -241,118 +176,6 @@ public class PanelPlugin extends JavaPlugin {
             managePlayer(request.params(":name"), request.params(":action"));
 
             return "OK";
-        });
-
-        get("/stats", "application/json", (request, response) -> {
-            if (!sessions.isLoggedIn(request.cookie("loggedin")))
-                return 0;
-
-            Gson gson = new Gson();
-
-            // Get RAM usage
-
-            Runtime runtime = Runtime.getRuntime();
-            NumberFormat format = NumberFormat.getInstance();
-
-            long allocatedMemory = runtime.totalMemory();
-            long freeMemory = runtime.freeMemory();
-
-            // Get CPU usage
-
-            OperatingSystemMXBean os = ManagementFactory.getOperatingSystemMXBean();
-            int processors = os.getAvailableProcessors();
-
-            double usage = os.getSystemLoadAverage() / processors;
-
-            long cpuUsage = Math.round(usage * 100.0D);
-
-            // shove in a hashmap
-            Map map = new HashMap();
-            map.put("total", (allocatedMemory / 1024) );
-            map.put("free", (freeMemory / 1024) );
-            map.put("tps", Lag.getTPS());
-            map.put("cpu", cpuUsage);
-
-            return gson.toJson(map);
-        });
-
-        get("/wsport", (request, response) -> socketPort );
-
-        post("/login", (request, response) -> {
-            String username = request.raw().getParameter("username");
-            String password = request.raw().getParameter("password");
-
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            md.update(password.getBytes());
-
-            byte byteData[] = md.digest();
-
-            //convert the byte to hex format method 1
-            StringBuffer sb = new StringBuffer();
-            for (int i = 0; i < byteData.length; i++) {
-                sb.append(Integer.toString((byteData[i] & 0xff) + 0x100, 16).substring(1));
-            }
-
-            if (Objects.equals(sessions.getPasswordForUser(username), sb.toString())) {
-                UUID sessionId = UUID.randomUUID();
-                sessions.addSession(sessionId.toString(), username);
-                response.cookie("loggedin", sessionId.toString(), 3600);
-            }
-
-            response.redirect("/");
-            return 0;
-        });
-
-        get("/switchtheme", (request, response) -> {
-            if (request.cookie("theme") == null) {
-                response.cookie("theme", "dark");
-            } else if (request.cookie("theme").equals("dark")) {
-                response.cookie("theme", "light");
-            } else {
-                response.cookie("theme", "dark");
-            }
-            response.redirect("/");
-            return 0;
-        });
-
-        get("/file/*", (request, response) -> {
-            if (!sessions.isLoggedIn(request.cookie("loggedin")))
-                return 0;
-
-            String splat = "";
-            for (String file : request.splat()) {
-                splat = splat + file;
-            }
-            splat = splat + "/";
-
-            File file = new File(new File(".").getAbsolutePath() + "/" + splat);
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
-
-            Map map = new HashMap();
-            ArrayList<String> folders = new ArrayList<String>();
-            ArrayList<String> files = new ArrayList<String>();
-
-            if (!file.exists()) {
-                return file;
-            }
-
-            if (file.isDirectory()) {
-                for (File fileEntry : file.listFiles()) {
-                    if (fileEntry.isDirectory()) {
-                        folders.add(fileEntry.getName());
-                    } else {
-                        files.add(fileEntry.getName());
-                    }
-                }
-            } else {
-                byte[] encoded = Files.readAllBytes(Paths.get(file.getAbsolutePath()));
-                return new String(encoded, Charset.defaultCharset());
-            }
-
-            map.put("folders", folders);
-            map.put("files", files);
-
-            return gson.toJson(map);
         });
 
         post("/file/*", (request, response) -> {

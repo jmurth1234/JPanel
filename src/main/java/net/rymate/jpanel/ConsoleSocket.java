@@ -8,14 +8,12 @@ import org.java_websocket.drafts.Draft;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
 
+import java.net.HttpCookie;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
+import java.util.*;
 
 import org.apache.logging.log4j.core.appender.AbstractAppender;
 
@@ -40,6 +38,26 @@ public class ConsoleSocket extends WebSocketServer {
 
     @Override
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
+        String cookieString = handshake.getFieldValue("Cookie");
+        String[] cookies = cookieString.split("\\;");
+        String token = "";
+        for (String cookie : cookies) {
+            if (cookie.contains("loggedin")) {
+                token = cookie.split("=")[1];
+            }
+        }
+        if (sessions.isLoggedIn(token)) {
+            sockets.put(conn, sessions.getAuthedUsername(token));
+            for (String msg : oldMsgs) {
+                conn.send(msg);
+            }
+            plugin.getServerLogger().log(Level.INFO, "Console user " + sockets.get(conn) + " logged in!");
+        } else {
+            plugin.getServerLogger().log(Level.INFO, "Console user " + sockets.get(conn) + " failed to log in!");
+
+            conn.close(0, "AUTH CODE INCORRECT, PLEASE LOG IN");
+        }
+
         conn.send("Connected!");
     }
 
@@ -50,32 +68,16 @@ public class ConsoleSocket extends WebSocketServer {
 
     @Override
     public void onMessage(WebSocket conn, String message) {
-        if (message.startsWith("AUTH")) {
-            String token = message.split(" ")[1];
-            if (sessions.isLoggedIn(token)) {
-                sockets.put(conn, sessions.getAuthedUsername(token));
-                for (String msg : oldMsgs) {
-                    conn.send(msg);
-                }
-                plugin.getServerLogger().log(Level.INFO, "Console user " + sockets.get(conn) + " logged in!");
-            } else {
-                plugin.getServerLogger().log(Level.INFO, "Console user " + sockets.get(conn) + " failed to log in!");
-
-                conn.close(0, "AUTH CODE INCORRECT, PLEASE LOG IN");
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(), message);
             }
-        } else {
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-                    plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(), message);
-                }
-            }.runTask(plugin);
+        }.runTask(plugin);
 
-            plugin.getServerLogger().log(Level.INFO, "Console user " + sockets.get(conn) + " ran the command " + message);
-        }
-
-        //conn.send("Command recieved!");
+        plugin.getServerLogger().log(Level.INFO, "Console user " + sockets.get(conn) + " ran the command " + message);
     }
+
 
     @Override
     public void onError(WebSocket conn, Exception ex) {
