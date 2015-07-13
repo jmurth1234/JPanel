@@ -11,9 +11,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by Ryan on 08/07/2015.
@@ -63,6 +61,9 @@ public class FileGetter extends GetterBase {
             }
             return new String(encoded, Charset.defaultCharset());
         }
+
+        Collections.sort(folders);
+        Collections.sort(files);
 
         map.put("folders", folders);
         map.put("files", files);

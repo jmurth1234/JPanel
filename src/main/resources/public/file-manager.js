@@ -8,19 +8,18 @@ $(document).ready(function () {
         success: function (result) {
             var result = JSON.parse(result);
             var fileList = $("#file-list");
-            fileList.append('<div class="collection-item"><h4>Folders</h4></div>');
             for (var i = 0; i < result.folders.length; i++) {
-                fileList.append('<a href="#!" onclick="openFolder(this)" class="collection-item">' + result.folders[i] + '</a>');
+                var folder = {"folder": result.folders[i]};
+                fileList.append(tmpl("item_tmpl", folder));
             }
-            fileList.append('<div class="collection-item"><h4>Files</h4></div>');
             for (var i = 0; i < result.files.length; i++) {
-                fileList.append('<a href="#!" onclick="openFile(this)" class="collection-item">' + result.files[i] + '</a>');
+                var file = {"file": result.files[i]};
+                fileList.append(tmpl("file_tmpl", file));
             }
         }});
 });
 
-function openFolder(element) {
-    folder = $(element).text();
+function openFolder(folder) {
     if (folder == "..") {
         var folders = currentDir.split("/");
         folders.pop(-1);
@@ -36,28 +35,29 @@ function openFolder(element) {
             var result = JSON.parse(result);
             var fileList = $("#file-list");
             fileList.html("");
-            fileList.append('<div class="collection-item"><h4>Folders</h4></div>');
-            fileList.append('<a href="#!" onclick="openFolder(this)" class="collection-item">..</a>');
+            var folder = {"folder": ".."};
+            fileList.append(tmpl("item_tmpl", folder));
             for (var i = 0; i < result.folders.length; i++) {
-                fileList.append('<a href="#!" onclick="openFolder(this)" class="collection-item">' + result.folders[i] + '</a>');
+                var folder = {"folder": result.folders[i]};
+                fileList.append(tmpl("item_tmpl", folder));
             }
-            fileList.append('<div class="collection-item"><h4>Files</h4></div>');
             for (var i = 0; i < result.files.length; i++) {
-                fileList.append('<a href="#!" onclick="openFile(this)" class="collection-item">' + result.files[i] + '</a>');
+                var file = {"file": result.files[i]};
+                fileList.append(tmpl("file_tmpl", file));
             }
         }});
 }
 
 
-function openFile(element) {
-    file = $(element).text();
-    $("#save-btn").show();
+function openFile(file) {
     currentFile = currentDir + "/" + file;
 
     console.log(currentFile);
     $.ajax({
         url: "/file/" + currentFile,
         success: function (result) {
+            $("#save-btn").show();
+
             editor = ace.edit("editor");
             editor.setTheme("ace/theme/twilight");
             editor.getSession().setMode("ace/mode/yaml");
@@ -75,3 +75,42 @@ function saveFile() {
         }
     });
 }
+
+
+
+// Simple JavaScript Templating
+// John Resig - http://ejohn.org/ - MIT Licensed
+(function(){
+    var cache = {};
+
+    this.tmpl = function tmpl(str, data){
+        // Figure out if we're getting a template, or if we need to
+        // load the template - and be sure to cache the result.
+        var fn = !/\W/.test(str) ?
+            cache[str] = cache[str] ||
+                tmpl(document.getElementById(str).innerHTML) :
+
+            // Generate a reusable function that will serve as a template
+            // generator (and which will be cached).
+            new Function("obj",
+                "var p=[],print=function(){p.push.apply(p,arguments);};" +
+
+                    // Introduce the data as local variables using with(){}
+                "with(obj){p.push('" +
+
+                    // Convert the template into pure JavaScript
+                str
+                    .replace(/[\r\t\n]/g, " ")
+                    .split("<%").join("\t")
+                    .replace(/((^|%>)[^\t]*)'/g, "$1\r")
+                    .replace(/\t=(.*?)%>/g, "',$1,'")
+                    .split("\t").join("');")
+                    .split("%>").join("p.push('")
+                    .split("\r").join("\\'")
+                + "');}return p.join('');");
+
+        // Provide some basic currying to the user
+        return data ? fn( data ) : fn;
+    };
+})();
+

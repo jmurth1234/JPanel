@@ -148,6 +148,12 @@ button:focus {
     background: none !important;
 }
 
-a.collection-item:hover {
+div.collection-item:hover {
     background: #333 !important;
+}
+
+.collection .collection-item.avatar i.circle {
+    color: #FFF;
+    background-color: #333 !important;
+    text-align: center;
 }

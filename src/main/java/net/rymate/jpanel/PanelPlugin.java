@@ -36,6 +36,9 @@ public class PanelPlugin extends JavaPlugin {
     private int httpPort = 4567;
     private int socketPort = 9003;
     private PanelSessions sessions;
+    private boolean useSsl = false;
+    private String keystoreFile;
+    private String keystorePass;
 
 
     public void onDisable() {
@@ -71,11 +74,22 @@ public class PanelPlugin extends JavaPlugin {
 
         config.set("http-port", config.get("http-port", httpPort));
         config.set("websocket-port", config.get("websocket-port", socketPort));
+        config.set("ssl", config.get("ssl", useSsl));
+        config.set("keystore file", config.get("keystore file", ""));
+        config.set("keystore password", config.get("keystore password", ""));
+
 
         httpPort = config.getInt("http-port");
         socketPort = config.getInt("websocket-port");
+        useSsl = config.getBoolean("ssl");
 
-        //saveConfig();
+        if (useSsl) {
+            keystoreFile = config.getString("keystore file");
+            keystorePass = config.getString("keystore password");
+            secure(keystoreFile, keystorePass, "", "");
+        }
+
+        saveConfig();
 
         // init spark server
         //setupSpark();
