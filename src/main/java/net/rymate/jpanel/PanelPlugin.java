@@ -1,6 +1,7 @@
 package net.rymate.jpanel;
 
 import net.rymate.jpanel.Utils.Lag;
+import net.rymate.jpanel.Utils.PasswordHash;
 import net.rymate.jpanel.getters.*;
 import net.rymate.jpanel.posters.FilePost;
 import net.rymate.jpanel.posters.LoginPost;
@@ -18,6 +19,8 @@ import org.java_websocket.drafts.Draft_17;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 
 import static spark.Spark.*;
 
@@ -36,9 +39,7 @@ public class PanelPlugin extends JavaPlugin {
     private int httpPort = 4567;
     private int socketPort = 9003;
     private PanelSessions sessions;
-    private boolean useSsl = false;
-    private String keystoreFile;
-    private String keystorePass;
+    private String secureSalt;
 
 
     public void onDisable() {
@@ -119,18 +120,10 @@ public class PanelPlugin extends JavaPlugin {
             }
 
             try {
-                MessageDigest md = MessageDigest.getInstance("SHA-256");
-                md.update(args[1].getBytes());
+                sender.sendMessage("Creating user....");
+                String password = PasswordHash.generateStrongPasswordHash(args[1]);
 
-                byte byteData[] = md.digest();
-
-                //convert the byte to hex format method 1
-                StringBuffer sb = new StringBuffer();
-                for (int i = 0; i < byteData.length; i++) {
-                    sb.append(Integer.toString((byteData[i] & 0xff) + 0x100, 16).substring(1));
-                }
-
-                PanelUser user = new PanelUser(sb.toString(), false);
+                PanelUser user = new PanelUser(password, false);
 
                 sessions.addUser(args[0], user);
 
@@ -138,7 +131,10 @@ public class PanelPlugin extends JavaPlugin {
                 config.set("users." + args[0] + ".canEditFiles", user.canEditFiles);
                 saveConfig();
 
+                sender.sendMessage("User created!");
+
             } catch (Exception e) {
+                sender.sendMessage("Failed to create user!");
                 e.printStackTrace();
                 return true;
             }
