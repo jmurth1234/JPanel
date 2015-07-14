@@ -38,8 +38,9 @@ public class PanelPlugin extends JavaPlugin {
 
     private int httpPort = 4567;
     private int socketPort = 9003;
+    private String socketPath = "";
+
     private PanelSessions sessions;
-    private String secureSalt;
 
 
     public void onDisable() {
@@ -75,9 +76,11 @@ public class PanelPlugin extends JavaPlugin {
 
         config.set("http-port", config.get("http-port", httpPort));
         config.set("websocket-port", config.get("websocket-port", socketPort));
+        config.set("websocket-path", config.get("websocket-path", socketPath));
 
         httpPort = config.getInt("http-port");
         socketPort = config.getInt("websocket-port");
+        socketPath = config.getString("websocket-path");
 
         saveConfig();
 
@@ -175,7 +178,10 @@ public class PanelPlugin extends JavaPlugin {
         return logger;
     }
 
-    public int getWebSocketPort() {
-        return socketPort;
+    public String getWebSocketPort() {
+        if (!socketPath.equals(""))
+            return socketPath;
+        else
+            return String.valueOf(socketPort);
     }
 }
