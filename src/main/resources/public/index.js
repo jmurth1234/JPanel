@@ -44,10 +44,11 @@ $(document).ready(function () {
     $.ajax({
         url: "/wsport",
         success: function (result) {
-            if (result === parseInt(result, 10))
+            if (result == parseInt(result, 10)) {
                 socket = new WebSocket("ws://" + document.domain + ":" + result + "/");
-            else
+            } else {
                 socket = new WebSocket("wss://" + document.domain + "/" + result + "/");
+            }
 
             socket.onmessage = function (event) {
                 term.echo(event.data)
