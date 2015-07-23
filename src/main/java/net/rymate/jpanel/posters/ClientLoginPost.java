@@ -4,17 +4,15 @@ import net.rymate.jpanel.Utils.PasswordHash;
 import spark.Request;
 import spark.Response;
 
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
-import java.util.Objects;
 import java.util.UUID;
 
 /**
  * Created by Ryan on 07/07/2015.
  */
-public class LoginPost extends PosterBase {
-    public LoginPost(String path) {
+public class ClientLoginPost extends PosterBase {
+    public ClientLoginPost(String path) {
         super(path);
     }
 
@@ -27,15 +25,13 @@ public class LoginPost extends PosterBase {
             if (PasswordHash.validatePassword(password, getSessions().getPasswordForUser(username))) {
                 UUID sessionId = UUID.randomUUID();
                 getSessions().addSession(sessionId.toString(), username);
-                   response.cookie("loggedin", sessionId.toString(), 3600);
+                response.cookie("loggedin", sessionId.toString(), 3600);
+                return "SUCCESS: " + sessionId.toString();
+            } else {
+                return "FAIL - PASSWORD INCORRECT";
             }
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (InvalidKeySpecException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            return "FAIL - " + e.getMessage();
         }
-
-        response.redirect("/");
-        return 0;
     }
 }

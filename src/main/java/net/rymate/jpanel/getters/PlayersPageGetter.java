@@ -1,8 +1,7 @@
 package net.rymate.jpanel.getters;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import net.rymate.jpanel.PanelPlugin;
+import net.rymate.jpanel.getters.GetterBase;
 import org.bukkit.entity.Player;
 import spark.ModelAndView;
 import spark.Request;
@@ -16,21 +15,14 @@ import java.util.Map;
 /**
  * Created by Ryan on 08/07/2015.
  */
-public class PlayersGetter extends GetterBase {
+public class PlayersPageGetter extends GetterBase {
 
-    public PlayersGetter(String path, PanelPlugin plugin) {
-        super(path, plugin);
-        setPlugin(plugin);
+    public PlayersPageGetter(String path, String template, PanelPlugin plugin) {
+        super(path, template, plugin);
     }
 
     @Override
-    protected Object getText(Request request, Response response) throws Exception {
-        if (!isLoggedIn(request.cookie("loggedin")))
-            return 0;
-
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-
-        HashMap list = new HashMap();
+    protected ModelAndView getPage(Request request, Response response) {
         List<Map> names = new ArrayList<>();
 
         for (Player p : getPlugin().getServer().getOnlinePlayers()) {
@@ -40,8 +32,7 @@ public class PlayersGetter extends GetterBase {
             names.add(playerMap);
         }
 
-        list.put("players", names);
-        return gson.toJson(list);
-
+        getTemplateMap().put("players", names);
+        return super.getPage(request, response);
     }
 }

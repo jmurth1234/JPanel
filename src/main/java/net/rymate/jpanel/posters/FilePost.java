@@ -21,7 +21,7 @@ public class FilePost extends PosterBase{
         if (!isLoggedIn(request.cookie("loggedin")))
             return 0;
 
-        if (getSessions().getAuthedUser(request.cookie("loggedin")).canEditFiles)
+        if (!getSessions().getAuthedUser(request.cookie("loggedin")).canEditFiles)
             return 0;
 
         String splat = "";

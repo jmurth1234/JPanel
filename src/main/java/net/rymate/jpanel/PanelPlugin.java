@@ -3,6 +3,7 @@ package net.rymate.jpanel;
 import net.rymate.jpanel.Utils.Lag;
 import net.rymate.jpanel.Utils.PasswordHash;
 import net.rymate.jpanel.getters.*;
+import net.rymate.jpanel.posters.ClientLoginPost;
 import net.rymate.jpanel.posters.FilePost;
 import net.rymate.jpanel.posters.LoginPost;
 import net.rymate.jpanel.getters.PlayerManagerPath;
@@ -18,9 +19,6 @@ import org.java_websocket.drafts.Draft_17;
 
 import java.io.IOException;
 import java.net.UnknownHostException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 
 import static spark.Spark.*;
 
@@ -92,12 +90,14 @@ public class PanelPlugin extends JavaPlugin {
 
         // pages (temporary until the page manager is implemented
         new IndexGetter("/", "index.hbs", this);
-        new PlayersGetter("/players", "players.hbs", this);
+        new PlayersPageGetter("/players", "players.hbs", this);
         new FilesPageGetter("/files", "file-manager.hbs", this);
 
         // text only paths
         new StatsGetter("/stats");
+        new PlayersGetter("/online-players", this);
         new LoginPost("/login");
+        new ClientLoginPost("/auth");
         new FilePost("/file/*");
         new SwitchThemeGetter("/switchtheme");
         new FileGetter("/file/*");

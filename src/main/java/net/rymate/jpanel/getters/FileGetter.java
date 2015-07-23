@@ -62,8 +62,8 @@ public class FileGetter extends GetterBase {
             return new String(encoded, Charset.defaultCharset());
         }
 
-        Collections.sort(folders);
-        Collections.sort(files);
+        Collections.sort(folders, String.CASE_INSENSITIVE_ORDER);
+        Collections.sort(files, String.CASE_INSENSITIVE_ORDER);
 
         map.put("folders", folders);
         map.put("files", files);
