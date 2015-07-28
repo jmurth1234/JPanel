@@ -24,9 +24,7 @@
 
         .container {
             width: 100% !important;
-            max-width: 960px;
         }
-
 
         .valign-wrapper {
             display: -webkit-box; /* OLD - iOS 6-, Safari 3.1-6, BB7 */
@@ -52,7 +50,7 @@
 </head>
 
 <body>
-{{> header.hbs }}
+{{{ header }}}
 
 <main>
     <div class="container">
@@ -114,6 +112,13 @@
 <script type="text/javascript" src="/masonry.js"></script>
 
 <script type="text/javascript" src="/players.js"></script>
+
+
+<script>
+    $(document).ready(function () {
+        $(".button-collapse").sideNav();
+    });
+</script>
 
 </body>
 </html>

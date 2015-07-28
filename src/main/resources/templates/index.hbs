@@ -71,6 +71,7 @@
                         <input id="cmd_box"
                                autocapitalize="off"
                                autocorrect="off"
+                               autocomplete="off"
                                placeholder="Execute a command..." type="text" class="validate">
                     </div>
                 </form>
@@ -116,6 +117,13 @@
 
 <script type="text/javascript" src="/index.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.96.1/js/materialize.min.js"></script>
+
+
+<script>
+    $(document).ready(function () {
+        $(".button-collapse").sideNav();
+    });
+</script>
 
 </body>
 </html>

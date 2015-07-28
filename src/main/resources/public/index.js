@@ -58,6 +58,8 @@ function ansiformat(data) {
 
 $(document).ready(function () {
     var socket;
+    var scrollback;
+    var fragment = document.createDocumentFragment();
     var term = $('#term');
     $.ajax({
         url: "/wsport",
@@ -69,8 +71,32 @@ $(document).ready(function () {
             }
 
             socket.onmessage = function (event) {
-                term.append("<p class='term_line'>" + ansiformat(event.data) + "</p>");
-                term.scrollTop(term.prop("scrollHeight"));
+                if (event.data.contains("SCROLLBACK")) {
+                    dataArray = event.data.split(" ");
+                    scrollback = dataArray[1];
+                }
+
+                if (scrollback > 0) {
+                    var newLine = document.createElement('p');
+                    newLine.className = "term_line";
+                    newLine.innerHTML = ansiformat(event.data);
+                    fragment.appendChild(newLine);
+                    scrollback--;
+                } else if (scrollback == 0) {
+                    var newLine = document.createElement('p');
+                    newLine.className = "term_line";
+                    newLine.innerHTML = ansiformat(event.data);
+                    fragment.appendChild(newLine);
+                    term.append(fragment);
+                    scrollback--;
+                    term.scrollTop(term.prop("scrollHeight"));
+                } else {
+                    var newLine = document.createElement('p');
+                    newLine.className = "term_line";
+                    newLine.innerHTML = ansiformat(event.data);
+                    term.append(newLine);
+                    term.scrollTop(term.prop("scrollHeight"));
+                }
             }
         }});
 
@@ -291,3 +317,7 @@ ansiparse.styles = {
     '3': 'italic',
     '4': 'underline'
 };
+
+// yolo
+
+String.prototype.contains = function(it) { return this.indexOf(it) != -1; };

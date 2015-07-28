@@ -48,6 +48,7 @@ public class ConsoleSocket extends WebSocketServer {
         }
         if (sessions.isLoggedIn(token)) {
             sockets.put(conn, sessions.getAuthedUsername(token));
+            conn.send("SCROLLBACK " + oldMsgs.size());
             for (String msg : oldMsgs) {
                 conn.send(msg);
             }
