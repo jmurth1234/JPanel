@@ -34,8 +34,20 @@
             color: #fff;
         }
 
+        #term {
+            height: 500px;
+            background: #000;
+            color: #fff;
+            overflow-y: scroll;
+        }
+
         #cmd_box {
             height: 32px;
+        }
+
+        .term_line {
+            margin: 0;
+            font-family: Consolas, Monaco, monospace;
         }
 
     </style>
@@ -43,7 +55,7 @@
 
 <body>
 
-{{> header.hbs }}
+{{{ header }}}
 
 <main>
     <div class="container">
@@ -101,15 +113,9 @@
 
 <!--Import jQuery before materialize.js-->
 <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
-<script type="text/javascript" src="/mousewheel.js"></script>
-<script type="text/javascript" src="/term.js"></script>
+
 <script type="text/javascript" src="/index.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.96.1/js/materialize.min.js"></script>
 
-<script>
-    $(document).ready(function () {
-        $(".button-collapse").sideNav();
-    });
-</script>
 </body>
 </html>

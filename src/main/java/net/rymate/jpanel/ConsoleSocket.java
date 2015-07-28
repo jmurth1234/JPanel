@@ -109,7 +109,7 @@ public class ConsoleSocket extends WebSocketServer {
             DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
             Date date = new Date();
             String message = event.getMessage().getFormattedMessage();
-            message = message.replaceAll("\\e\\[[\\d;]*[^\\d;]",""); // remove ansi characters as they don't work well
+            //message = message.replaceAll("\\e\\[[\\d;]*[^\\d;]",""); // remove ansi characters as they don't work well
             appendMessage(dateFormat.format(date) + " [" + event.getLevel().toString() + "] " + message);
         }
     }

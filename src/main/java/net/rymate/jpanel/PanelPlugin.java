@@ -13,6 +13,9 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.java_websocket.drafts.Draft_17;
@@ -103,10 +106,32 @@ public class PanelPlugin extends JavaPlugin {
         new FileGetter("/file/*");
         new PlayerManagerPath("/player/:name/:action", this);
 
+        PanelNavigation nav = PanelNavigation.getInstance();
+        nav.registerPath("/", "Home");
+        nav.registerPath("/players", "Players");
+        nav.registerPath("/files", "Files");
+        //nav.registerPath("/switchtheme", "Change Theme");
+
+        if (getServer().getPluginManager().isPluginEnabled("Vault")) {
+            PanelNavigation.getInstance().registerPath("/permissions", "Permissions");
+            new PermissionsPageGetter("/permissions", "permissions.hbs", this);
+        }
+
 
         setupWS();
 
         System.out.println("[JPanel] JPanel enabled!");
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onPluginEnable(PluginEnableEvent event) {
+        String pluginName = event.getPlugin().getName();
+
+        if (pluginName.equals("Vault")) {
+            PanelNavigation.getInstance().registerPath("/permissions", "Permissions");
+            new PermissionsPageGetter("/permissions", "permissions.hbs", this);
+        }
+
     }
 
     @Override

@@ -5,8 +5,9 @@ author: rymate1234
 load: STARTUP
 
 main: net.rymate.jpanel.PanelPlugin
+softdepend: [Vault]
 
 commands:
-   addlogin:
-      description: Adds a user to jPanel
-      usage: /<command> [username] [password]
+  addlogin:
+    description: Adds a user to jPanel
+    usage: /<command> [username] [password]

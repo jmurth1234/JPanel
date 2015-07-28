@@ -1,5 +1,6 @@
 package net.rymate.jpanel.getters;
 
+import net.rymate.jpanel.PanelNavigation;
 import net.rymate.jpanel.PanelPlugin;
 import net.rymate.jpanel.PanelSessions;
 import spark.ModelAndView;
@@ -47,6 +48,8 @@ public abstract class GetterBase {
             boolean dark = request.cookie("theme").equals("dark");
             getTemplateMap().put("dark", dark);
         }
+
+        getTemplateMap().put("header", PanelNavigation.getInstance().generate());
 
         if (sessions.isLoggedIn(request.cookie("loggedin"))) {
             return new ModelAndView(getTemplateMap(), getTemplate());

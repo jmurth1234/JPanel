@@ -4,19 +4,23 @@
         <a href="#" data-activates="mobile-demo" class="button-collapse"><i class="material-icons">menu</i></a>
         <a href="/" class="brand-logo">JPanel</a>
         <ul id="nav-mobile" class="right hide-on-med-and-down">
-            <li><a href="/">Home</a></li>
-            <li><a href="/players">Online Players</a></li>
-            <li><a href="/files">File manager</a></li>
-            <li><a href="">Permissions manager</a></li>
-            <li><a href="/switchtheme">Change Theme</a></li>
+        {{#each paths}}
+            <li><a href="{{this.path}}">{{this.name}}</a></li>
+        {{/each}}
+            <li><a href="/switchtheme" title="Change Theme"><i class="material-icons">settings_brightness</i></a></li>
         </ul>
 
         <ul class="side-nav" id="mobile-demo">
-            <li><a href="/">Home</a></li>
-            <li><a href="/players">Online Players</a></li>
-            <li><a href="/files">File manager</a></li>
-            <li><a href="">Permissions manager</a></li>
+            {{#each paths}}
+                <li><a href="{{this.path}}">{{this.name}}</a></li>
+            {{/each}}
             <li><a href="/switchtheme">Change Theme</a></li>
         </ul>
     </div>
 </nav>
+
+<script>
+    $(document).ready(function () {
+        $(".button-collapse").sideNav();
+    });
+</script>

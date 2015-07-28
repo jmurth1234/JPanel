@@ -184,7 +184,6 @@
 
 }(jQuery));
 
-
 function kickPlayer(element) {
     var player = $(element).attr("name");
     var confirmation = confirm("Are you sure you want to kick " + player + "?");
