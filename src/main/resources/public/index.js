@@ -60,7 +60,8 @@ $(document).ready(function () {
     var socket;
     var scrollback;
     var fragment = document.createDocumentFragment();
-    var term = $('#term');
+    var term = $('#term-content');
+    $(".nano").nanoScroller({ scroll: 'bottom' });
     $.ajax({
         url: "/wsport",
         success: function (result) {

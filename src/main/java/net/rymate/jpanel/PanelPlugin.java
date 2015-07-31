@@ -7,6 +7,7 @@ import net.rymate.jpanel.posters.ClientLoginPost;
 import net.rymate.jpanel.posters.FilePost;
 import net.rymate.jpanel.posters.LoginPost;
 import net.rymate.jpanel.getters.PlayerManagerPath;
+import net.rymate.jpanel.posters.PlayerManagerPlus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 import org.bukkit.command.Command;
@@ -115,6 +116,7 @@ public class PanelPlugin extends JavaPlugin {
         if (getServer().getPluginManager().isPluginEnabled("Vault")) {
             PanelNavigation.getInstance().registerPath("/permissions", "Permissions");
             new PermissionsPageGetter("/permissions", "permissions.hbs", this);
+            new PlayerManagerPlus("/permissions", this);
         }
 
 
@@ -128,8 +130,9 @@ public class PanelPlugin extends JavaPlugin {
         String pluginName = event.getPlugin().getName();
 
         if (pluginName.equals("Vault")) {
-            PanelNavigation.getInstance().registerPath("/permissions", "Permissions");
-            new PermissionsPageGetter("/permissions", "permissions.hbs", this);
+            PanelNavigation.getInstance().registerPath("/perms", "Permissions");
+            new PermissionsPageGetter("/perms", "permissions.hbs", this);
+            new PlayerManagerPlus("/permissions", this);
         }
 
     }
