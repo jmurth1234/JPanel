@@ -94,29 +94,29 @@ public class PanelPlugin extends JavaPlugin {
 
         // pages (temporary until the page manager is implemented
         new IndexGetter("/", "index.hbs", this);
-        new PlayersPageGetter("/players", "players.hbs", this);
-        new FilesPageGetter("/files", "file-manager.hbs", this);
+        new SimplePageGetter("/files", "file-manager.hbs", this);
 
         // text only paths
         new StatsGetter("/stats");
-        new PlayersGetter("/online-players", this);
         new LoginPost("/login");
         new ClientLoginPost("/auth");
         new FilePost("/file/*");
         new SwitchThemeGetter("/switchtheme");
         new FileGetter("/file/*");
-        new PlayerManagerPath("/player/:name/:action", this);
 
         PanelNavigation nav = PanelNavigation.getInstance();
         nav.registerPath("/", "Home");
         nav.registerPath("/players", "Players");
         nav.registerPath("/files", "Files");
-        //nav.registerPath("/switchtheme", "Change Theme");
 
         if (getServer().getPluginManager().isPluginEnabled("Vault")) {
-            PanelNavigation.getInstance().registerPath("/permissions", "Permissions");
-            new PermissionsPageGetter("/permissions", "permissions.hbs", this);
-            new PlayerManagerPlus("/permissions", this);
+            //PanelNavigation.getInstance().registerPath("/permissions", "Permissions");
+            new SimplePageGetter("/players", "playersplus.hbs", this);
+            new PlayerManagerPlus("/players", this);
+        } else {
+            new PlayersPageGetter("/players", "players.hbs", this);
+            new PlayersGetter("/players", this);
+            new PlayerManagerPath("/player/:name/:action", this);
         }
 
 
@@ -131,7 +131,7 @@ public class PanelPlugin extends JavaPlugin {
 
         if (pluginName.equals("Vault")) {
             PanelNavigation.getInstance().registerPath("/perms", "Permissions");
-            new PermissionsPageGetter("/perms", "permissions.hbs", this);
+            new SimplePageGetter("/perms", "playersplus.hbs", this);
             new PlayerManagerPlus("/permissions", this);
         }
 

@@ -39,7 +39,7 @@ public class PlayerManagerPlus extends PosterBase {
         if (permissionProvider != null) {
             permission = permissionProvider.getProvider();
         } else {
-            throw new NullPointerException("We couldn't get permissions from vault! This is probably a bug!");
+            throw new NullPointerException("We couldn't get permissions from Vault! This is probably a bug!");
         }
     }
 
@@ -89,6 +89,42 @@ public class PlayerManagerPlus extends PosterBase {
                 } else {
                     return "Invalid type specified!";
                 }
+            } else if (action.equals("info")) {
+                UUID playerUuid;
+
+                if (!requestJson.has("target")) {
+                    return "no target";
+                } else {
+                    playerUuid = UUID.fromString(requestJson.get("target").getAsString());
+                }
+
+                TinyPlayer tinyPlayer = new TinyPlayer();
+                if (plugin.getServer().getOfflinePlayer(playerUuid).isOnline()) {
+                    Player player = plugin.getServer().getPlayer(playerUuid);
+                    tinyPlayer.playerName = player.getName();
+                    tinyPlayer.playerUuid = player.getUniqueId().toString();
+                    tinyPlayer.extras.put("health", player.getHealth());
+                    tinyPlayer.extras.put("world", player.getWorld().getName());
+                    tinyPlayer.extras.put("online", true);
+                    tinyPlayer.extras.put("groups", permission.getPlayerGroups(player));
+                } else {
+                    OfflinePlayer player = plugin.getServer().getOfflinePlayer(playerUuid);
+                    tinyPlayer.playerName = player.getName();
+                    tinyPlayer.playerUuid = player.getUniqueId().toString();
+                    tinyPlayer.extras.put("online", false);
+                }
+
+                responseMap.put("result", tinyPlayer);
+            } else if (action.equals("kick") || (action.equals("ban"))) {
+                String player;
+
+                if (!requestJson.has("target")) {
+                    return "no target";
+                } else {
+                    player = requestJson.get("target").getAsString();
+                }
+
+                plugin.managePlayer(player, action);
             } else if (action.equals("getgroups")) {
                 if (!permission.hasGroupSupport()) {
                     return "your permissions plugin has no groups support";
@@ -112,7 +148,11 @@ public class PlayerManagerPlus extends PosterBase {
 
                     HashMap resultMap = new HashMap();
 
-                    resultMap.put("groups", permission.getPlayerGroups(player));
+                    if (world.equals("")) {
+                        resultMap.put("groups", permission.getPlayerGroups(player));
+                    } else {
+                        resultMap.put("groups", permission.getPlayerGroups(world, player));
+                    }
                     resultMap.put("world", player.getWorld().getName());
 
                     responseMap.put("result", resultMap);
@@ -132,16 +172,120 @@ public class PlayerManagerPlus extends PosterBase {
 
                 }
 
-            } else if (action.equals("kick") || (action.equals("ban"))) {
-                String player;
+            } else if (action.equals("addgroup")) {
+                if (!permission.hasGroupSupport()) {
+                    return "your permissions plugin has no groups support";
+                }
+
+                UUID target;
+                String value;
 
                 if (!requestJson.has("target")) {
                     return "no target";
                 } else {
-                    player = requestJson.get("target").getAsString();
+                    target = UUID.fromString(requestJson.get("target").getAsString());
                 }
 
-                plugin.managePlayer(player, action);
+                if (!requestJson.has("value")) {
+                    return "no value";
+                } else {
+                    value = requestJson.get("value").getAsString();
+                }
+
+                String world = "";
+
+                if (requestJson.has("world")) {
+                    world =  requestJson.get("world").getAsString();
+                }
+
+                if (plugin.getServer().getOfflinePlayer(target).isOnline()) {
+                    Player player = plugin.getServer().getPlayer(target);
+
+                    HashMap resultMap = new HashMap();
+                    boolean success;
+                    if (world.equals("")) {
+                        success = permission.playerAddGroup(player, value);
+                    } else {
+                        success = permission.playerAddGroup(world, player, value);
+                    }
+
+                    resultMap.put("success", success);
+                    resultMap.put("world", player.getWorld().getName());
+
+                    responseMap.put("result", resultMap);
+
+                } else {
+                    OfflinePlayer player = plugin.getServer().getOfflinePlayer(target);
+                    if (world.equals("")) {
+                        return "Please specify a world for offline players!";
+                    }
+
+                    HashMap resultMap = new HashMap();
+
+                    resultMap.put("success", permission.playerAddGroup(world, player, value));
+                    resultMap.put("world", world);
+
+                    responseMap.put("result", resultMap);
+
+                }
+
+            } else if (action.equals("rmgroup")) {
+                if (!permission.hasGroupSupport()) {
+                    return "your permissions plugin has no groups support";
+                }
+
+                UUID target;
+                String value;
+
+                if (!requestJson.has("target")) {
+                    return "no target";
+                } else {
+                    target = UUID.fromString(requestJson.get("target").getAsString());
+                }
+
+                if (!requestJson.has("value")) {
+                    return "no value";
+                } else {
+                    value = requestJson.get("value").getAsString();
+                }
+
+                String world = "";
+
+                if (requestJson.has("world")) {
+                    world =  requestJson.get("world").getAsString();
+                }
+
+                if (plugin.getServer().getOfflinePlayer(target).isOnline()) {
+                    Player player = plugin.getServer().getPlayer(target);
+
+                    HashMap resultMap = new HashMap();
+                    boolean success;
+                    if (world.equals("")) {
+                        success = permission.playerRemoveGroup(player, value);
+                    } else {
+                        success = permission.playerRemoveGroup(world, player, value);
+                    }
+
+                    resultMap.put("success", success);
+                    resultMap.put("world", player.getWorld().getName());
+
+                    responseMap.put("result", resultMap);
+
+                } else {
+                    OfflinePlayer player = plugin.getServer().getOfflinePlayer(target);
+                    if (world.equals("")) {
+                        return "Please specify a world for offline players!";
+                    }
+
+                    HashMap resultMap = new HashMap();
+
+                    resultMap.put("success", permission.playerRemoveGroup(world, player, value));
+                    resultMap.put("world", world);
+
+                    responseMap.put("result", resultMap);
+
+                }
+
             }
         }
 
@@ -151,5 +295,6 @@ public class PlayerManagerPlus extends PosterBase {
     class TinyPlayer {
         public String playerUuid;
         public String playerName;
+        public HashMap extras = new HashMap<>();
     }
 }

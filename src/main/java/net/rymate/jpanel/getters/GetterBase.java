@@ -3,6 +3,7 @@ package net.rymate.jpanel.getters;
 import net.rymate.jpanel.PanelNavigation;
 import net.rymate.jpanel.PanelPlugin;
 import net.rymate.jpanel.PanelSessions;
+import org.bukkit.plugin.java.JavaPlugin;
 import spark.ModelAndView;
 import spark.Request;
 import spark.Response;
@@ -18,7 +19,7 @@ import static spark.Spark.*;
  * Created by Ryan on 07/07/2015.
  */
 public abstract class GetterBase {
-    private PanelPlugin plugin;
+    private JavaPlugin plugin;
     private PanelSessions sessions;
     private String template;
     private HashMap templateMap = new HashMap();
@@ -29,7 +30,7 @@ public abstract class GetterBase {
         get(path, (request, response) -> getText(request, response));
     }
 
-    public GetterBase(String path, String template, PanelPlugin plugin) {
+    public GetterBase(String path, String template, JavaPlugin plugin) {
         sessions = PanelSessions.getInstance();
         this.plugin = plugin;
         this.template = template;
@@ -70,7 +71,7 @@ public abstract class GetterBase {
         return sessions.isLoggedIn(token);
     }
 
-    public PanelPlugin getPlugin() {
+    public JavaPlugin getPlugin() {
         return plugin;
     }
     public void setPlugin(PanelPlugin plugin) {

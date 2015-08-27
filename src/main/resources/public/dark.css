@@ -139,7 +139,7 @@ button:focus {
 /* CSS for the list of files */
 
 .collection {
-    border: 0px none !important;
+    border: 1px solid #333 !important;
 }
 
 .collection-item {
@@ -156,4 +156,17 @@ div.collection-item:hover {
     color: #FFF;
     background-color: #333 !important;
     text-align: center;
+}
+
+/* CSS for the tabs */
+.tabs .indicator {
+    background-color: rgb(102, 102, 102);
+}
+
+.tabs .tab a {
+    color: #FFF;
+}
+
+.tabs {
+    background-color: rgb(51, 51, 51);
 }

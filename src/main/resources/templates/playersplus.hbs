@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!--Import materialize.css-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.96.1/css/materialize.min.css">
+    <link rel="stylesheet" href="/term.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    {{#if dark}}
+        <link rel="stylesheet" href="/dark.css">
+    {{/if}}
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+
+    <style>
+        body {
+            display: flex;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+
+        main {
+            flex: 1 0 auto;
+        }
+
+        .container {
+            width: 100% !important;
+        }
+
+        .collection {
+            height: calc(100vh - 84px);
+            overflow-y: auto;
+            margin-bottom: 0px;
+
+        }
+
+        .collection-item.avatar {
+            height: auto !important;
+            padding-left: 0px !important;
+        }
+
+        .collection .collection-item.avatar .circle {
+            position: relative;
+            width: 42px;
+            height: 42px;
+            overflow: hidden;
+            left: 0px !important;
+            vertical-align: middle;
+            font-size: 24px !important;
+        }
+
+        .circle {
+            border-radius: 0;
+        }
+
+        .p25 {
+            width: 25%;
+        }
+
+        .p75 {
+            width: 75%;
+        }
+
+        .img {
+            width: 100%;
+            max-height: 175px;
+        }
+
+        .player-header {
+            max-height: 175px;
+        }
+
+        .row {
+            margin-bottom: 0px;
+        }
+
+    </style>
+</head>
+
+<body>
+{{{ header }}}
+
+<main>
+    <div class="container">
+        <div class="row">
+            <div class="row">
+                <div class="col s12 m4">
+
+                    <div class="collection">
+                        <ul class="tabs">
+                            <li class="tab col s3"><a href="#online_pl">Online Players</a></li>
+                            <li class="tab col s3"><a href="#all_pl">All Players</a></li>
+
+                        </ul>
+
+                        <div id="online_pl" >
+
+                        </div>
+
+                        <div id="all_pl" >
+
+                        </div>
+                    </div>
+
+                </div>
+                <div class="col s12 m8" id="player_info">
+
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+
+<script type="text/html" id="item_tmpl">
+    <div onclick="openPlayer('<%=player.playerUuid%>')" class="collection-item avatar valign-wrapper">
+        <div class="col">
+            <img class="circle" src="https://minotar.net/avatar/<%=player.playerName%>"/>
+        </div>
+        <div class="col s10">
+            <a href="#!" class="black-text">
+                <%=player.playerName%>
+            </a>
+        </div>
+    </div>
+</script>
+
+<script type="text/html" id="player_info_tmpl">
+    <div class="collection">
+
+        <div class="row player-header">
+            <div class="col p25">
+                <img class="img" src="https://minotar.net/avatar/<%=player.playerName%>"/>
+            </div>
+
+            <div class="col p75">
+                <h2><%=player.playerName%></h2>
+                <h5 class="truncate">UUID: <%=player.playerUuid%></h5>
+            </div>
+        </div>
+
+        <div class="row">
+
+        </div>
+
+    </div>
+
+</script>
+
+<!--Import jQuery before materialize.js-->
+<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.96.1/js/materialize.min.js"></script>
+
+<script src="/playersplus.js"></script>
+
+
+<script>
+    $(document).ready(function () {
+        $(".button-collapse").sideNav();
+    });
+</script>
+
+
+</body>
+</html>
