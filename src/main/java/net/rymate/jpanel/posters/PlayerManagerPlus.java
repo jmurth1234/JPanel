@@ -8,14 +8,13 @@ import net.milkbowl.vault.permission.Permission;
 import net.rymate.jpanel.PanelPlugin;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import spark.Request;
 import spark.Response;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * This class is the base of an advanced players manager
@@ -105,13 +104,17 @@ public class PlayerManagerPlus extends PosterBase {
                     tinyPlayer.playerUuid = player.getUniqueId().toString();
                     tinyPlayer.extras.put("health", player.getHealth());
                     tinyPlayer.extras.put("world", player.getWorld().getName());
+                    tinyPlayer.extras.put("gamemode", player.getGameMode().name());
                     tinyPlayer.extras.put("online", true);
                     tinyPlayer.extras.put("groups", permission.getPlayerGroups(player));
+                    tinyPlayer.extras.put("permissions", getPlayerPermissions(player));
                 } else {
                     OfflinePlayer player = plugin.getServer().getOfflinePlayer(playerUuid);
                     tinyPlayer.playerName = player.getName();
                     tinyPlayer.playerUuid = player.getUniqueId().toString();
                     tinyPlayer.extras.put("online", false);
+                    tinyPlayer.extras.put("world", plugin.getServer().getWorlds().get(0).getName());
+                    tinyPlayer.extras.put("groups", permission.getPlayerGroups(plugin.getServer().getWorlds().get(0).getName(), player));
                 }
 
                 responseMap.put("result", tinyPlayer);
@@ -290,6 +293,12 @@ public class PlayerManagerPlus extends PosterBase {
         }
 
         return new GsonBuilder().setPrettyPrinting().create().toJson(responseMap);
+    }
+
+    private List<String> getPlayerPermissions(Player player) {
+        List<String> perms = player.getEffectivePermissions().stream().map(PermissionAttachmentInfo::getPermission).collect(Collectors.toList());
+        Collections.sort(perms, String.CASE_INSENSITIVE_ORDER);
+        return perms;
     }
 
     class TinyPlayer {

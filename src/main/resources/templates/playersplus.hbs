@@ -73,6 +73,17 @@
             margin-bottom: 0px;
         }
 
+        .short-collection {
+            margin: 0.5rem 0px 1rem;
+            border: 1px solid #E0E0E0;
+            border-radius: 2px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .overflow {
+            overflow-y: auto
+        }
     </style>
 </head>
 
@@ -87,8 +98,8 @@
 
                     <div class="collection">
                         <ul class="tabs">
-                            <li class="tab col s3"><a href="#online_pl">Online Players</a></li>
-                            <li class="tab col s3"><a href="#all_pl">All Players</a></li>
+                            <li class="tab col s3"><a class="truncate" href="#online_pl">Online Players</a></li>
+                            <li class="tab col s3"><a class="truncate" href="#all_pl">All Players</a></li>
 
                         </ul>
 
@@ -138,9 +149,92 @@
             </div>
         </div>
 
-        <div class="row">
+        <% if (player.extras.online) { %>
+            <div class="row">
+                <ul class="short-collection">
+                    <li class="collection-item">Health: <%=player.extras.health%></li>
+                    <li class="collection-item">Current World: <%=player.extras.world%></li>
+                    <li class="collection-item">Current Gamemode: <%=player.extras.gamemode%></li>
+                    <li class="collection-item">Online: <%=player.extras.online%></li>
+                </ul>
+            </div>
+        <% } else {%>
+            <div class="row">
+                <ul class="short-collection">
+                    <li class="collection-item">Online: <%=player.extras.online%></li>
+                </ul>
+            </div>
+        <% } %>
 
+        <% if (player.extras.online) { %>
+        <div class="row">
+            <div class="short-collection overflow">
+                <ul class="tabs">
+                    <li class="tab col"><a class="truncate" href="#groups">Groups</a></li>
+                    <li class="tab col"><a class="truncate" href="#perms">Permissions</a></li>
+                </ul>
+
+                <div id="groups" >
+
+                    <% for (i = 0; i < player.extras.groups.length; i++) { %>
+                        <div class="collection-item">
+                            <%=player.extras.groups[i]%>
+                            <a href="#!" class="secondary-content" onclick="removeGroup('<%=player.extras.groups[i]%>')"><i class="material-icons">delete</i></a>
+                        </div>
+
+                    <% } %>
+
+
+                    <form id="groupForm" onsubmit="return addGroup()" class="collection-item">
+                        <input placeholder="Group" name="group" type="text" class="validate">
+                        <button type="submit" name="action" class="waves-effect waves-light btn">Add Group</button>
+                    </form>
+
+                </div>
+
+                <div id="perms" >
+                    <div class="collection-item">
+                        <p>These are calculated from the bukkit superperms APIs, and may not reflect the permissions nodes present in the config files.</p>
+                    </div>
+
+                    <% for (i = 0; i < player.extras.permissions.length; i++) { %>
+                    <div class="collection-item">
+                        <%=player.extras.permissions[i]%>
+                    </div>
+
+                    <% } %>
+
+                </div>
+            </div>
         </div>
+        <% } else {%>
+        <div class="row">
+            <div class="short-collection overflow">
+
+                <div id="groups" >
+                    <div class="collection-item">
+                        Selected World: <%=player.extras.world%>
+                    </div>
+
+
+                <% for (i = 0; i < player.extras.groups.length; i++) { %>
+                <div class="collection-item">
+                    <%=player.extras.groups[i]%>
+                    <a href="#!" class="secondary-content" onclick="removeGroup('<%=player.extras.groups[i]%>')"><i class="material-icons">delete</i></a>
+                </div>
+
+                <% } %>
+
+                <form id="groupForm" onsubmit="return addGroup()" class="collection-item">
+                    <input placeholder="Group" name="group" type="text" class="validate">
+                    <button type="submit" name="action" class="waves-effect waves-light btn">Add Group</button>
+                </form>
+
+                </div>
+
+            </div>
+        </div>
+        <% } %>
 
     </div>
 
