@@ -81,8 +81,8 @@ public class ConsoleSocket extends WebSocketServer {
             }
         }.runTask(plugin);
 
-        plugin.getServerLogger().log(Level.INFO, "Console user " + username + " ran the command " + message);
-
+        if (!message.contains("passwd"))
+            plugin.getServerLogger().log(Level.INFO, "Console user " + username + " ran the command " + message);
     }
 
 
