@@ -101,6 +101,7 @@ public class PanelPlugin extends JavaPlugin {
         // text only paths
         new StatsGetter("/stats");
         new LoginPost("/login", logger);
+        new LogoutPath("/logout");
         new ClientLoginPost("/auth", logger);
         new FilePost("/file/*");
         new SwitchThemeGetter("/switchtheme");
@@ -110,6 +111,7 @@ public class PanelPlugin extends JavaPlugin {
         nav.registerPath("/", "Home");
         nav.registerPath("/players", "Players");
         nav.registerPath("/files", "Files");
+        nav.registerPath("/logout", "Logout");
 
         if (getServer().getPluginManager().isPluginEnabled("Vault")) {
             //PanelNavigation.getInstance().registerPath("/permissions", "Permissions");
@@ -173,6 +175,48 @@ public class PanelPlugin extends JavaPlugin {
                 e.printStackTrace();
                 return true;
             }
+
+            return true;
+        } else if (cmd.getName().equalsIgnoreCase("passwd")) {
+            if (args.length < 2) {
+                sender.sendMessage("You must specify a username, the old password and the new password!");
+                return true;
+            }
+
+            if (sender instanceof Player) {
+                sender.sendMessage("This must be run by the console!");
+                return true;
+            }
+
+            try {
+                PanelUser user = sessions.getUser(args[0]);
+                String oldPassword = args[1];
+
+                if (PasswordHash.validatePassword(oldPassword, user.password)) {
+                    String newPassword = PasswordHash.generateStrongPasswordHash(args[2]);
+
+                    PanelUser newUser = new PanelUser(newPassword, user.canEditFiles, user.canChangeGroups, user.canSendCommands);
+
+                    sessions.addUser(args[0], newUser);
+                    config.set("users." + args[0] + ".password", newUser.password);
+                    config.set("users." + args[0] + ".canEditFiles", newUser.canEditFiles);
+                    config.set("users." + args[0] + ".canChangeGroups", newUser.canChangeGroups);
+                    config.set("users." + args[0] + ".canSendCommands", newUser.canSendCommands);
+
+                    saveConfig();
+
+                    sender.sendMessage("Password for " + args[0] + " changed!");
+
+                } else {
+                    sender.sendMessage("Old password incorrect!");
+                }
+
+            } catch (Exception e) {
+                sender.sendMessage("Failed to create user!");
+                e.printStackTrace();
+                return true;
+            }
+
 
             return true;
         }

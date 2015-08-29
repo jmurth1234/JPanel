@@ -40,6 +40,10 @@ public class PanelSessions {
         sessions.put(sessionKey, username);
     }
 
+    public void removeSession(String sessionKey) {
+        sessions.remove(sessionKey);
+    }
+
     public PanelUser getAuthedUser(String loggedin) {
         String user = sessions.get(loggedin);
         return users.get(user);

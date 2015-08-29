@@ -11,3 +11,6 @@ commands:
   addlogin:
     description: Adds a user to jPanel
     usage: /<command> [username] [password]
+  passwd:
+    description: Change the password for a JPanel user
+    usage: /<command> [username] [oldpassword] [newpassword]
