@@ -183,7 +183,7 @@ public class PlayerManagerPlus extends PosterBase {
                     resultMap.put("reason", "You're not allowed to modify groups!");
 
                     responseMap.put("result", resultMap);
-                    return responseMap;
+                    return new GsonBuilder().setPrettyPrinting().create().toJson(responseMap);
                 }
 
                 if (!permission.hasGroupSupport()) {
@@ -191,7 +191,7 @@ public class PlayerManagerPlus extends PosterBase {
                     resultMap.put("reason", "Your permissions plugin has no groups support!");
 
                     responseMap.put("result", resultMap);
-                    return responseMap;
+                    return new GsonBuilder().setPrettyPrinting().create().toJson(responseMap);
                 }
 
                 UUID target;
@@ -258,11 +258,15 @@ public class PlayerManagerPlus extends PosterBase {
                     resultMap.put("reason", "You're not allowed to modify groups!");
 
                     responseMap.put("result", resultMap);
-                    return responseMap;
+                    return new GsonBuilder().setPrettyPrinting().create().toJson(responseMap);
                 }
 
                 if (!permission.hasGroupSupport()) {
-                    return "your permissions plugin has no groups support";
+                    resultMap.put("success", false);
+                    resultMap.put("reason", "Your permissions plugin has no groups support!");
+
+                    responseMap.put("result", resultMap);
+                    return new GsonBuilder().setPrettyPrinting().create().toJson(responseMap);
                 }
 
                 UUID target;

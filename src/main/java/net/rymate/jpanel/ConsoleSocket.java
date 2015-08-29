@@ -67,19 +67,22 @@ public class ConsoleSocket extends WebSocketServer {
 
     @Override
     public void onMessage(WebSocket conn, String message) {
-        if (!sessions.getAuthedUser(sockets.get(conn)).canSendCommands) {
+        String username = sockets.get(conn);
+
+        if (!sessions.getUser(username).canSendCommands) {
             conn.send("You're not allowed to send commands! Contact the server admin if this is in error.");
-        } else {
-
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-                    plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(), message);
-                }
-            }.runTask(plugin);
-
-            plugin.getServerLogger().log(Level.INFO, "Console user " + sockets.get(conn) + " ran the command " + message);
+            return;
         }
+
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(), message);
+            }
+        }.runTask(plugin);
+
+        plugin.getServerLogger().log(Level.INFO, "Console user " + username + " ran the command " + message);
+
     }
 
 

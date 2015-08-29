@@ -77,6 +77,9 @@ function addGroup() {
             if (res.success) {
                 openPlayer(currentPlayer.playerUuid);
                 alert("Group added!");
+            } else {
+                openPlayer(currentPlayer.playerUuid);
+                alert(res.reason);
             }
         }
     });
@@ -101,6 +104,9 @@ function removeGroup(group) {
             if (res.success) {
                 openPlayer(currentPlayer.playerUuid);
                 alert("Group removed!");
+            } else {
+                openPlayer(currentPlayer.playerUuid);
+                alert(res.reason);
             }
         }
     });

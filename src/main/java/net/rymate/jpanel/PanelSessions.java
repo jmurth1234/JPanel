@@ -45,6 +45,10 @@ public class PanelSessions {
         return users.get(user);
     }
 
+    public PanelUser getUser(String username) {
+        return users.get(username);
+    }
+
     public void destroy() {
         this.sessions = null;
         this.users = null;
