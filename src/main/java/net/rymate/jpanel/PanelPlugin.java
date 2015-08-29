@@ -70,8 +70,10 @@ public class PanelPlugin extends JavaPlugin {
             // load the users
             for (String key : config.getConfigurationSection("users").getKeys(false)) {
                 String password = config.getString("users." + key + ".password");
-                boolean canEditFiles = config.getBoolean("users." + key + ".canEditFiles");
-                PanelUser user = new PanelUser(password, canEditFiles);
+                boolean canEditFiles = config.getBoolean("users." + key + ".canEditFiles", false);
+                boolean canChangeGroups = config.getBoolean("users." + key + ".canChangeGroups", false);
+                boolean canSendCommands = config.getBoolean("users." + key + ".canSendCommands", false);
+                PanelUser user = new PanelUser(password, canEditFiles, canChangeGroups, canSendCommands);
                 sessions.addUser(key, user);
             }
         }
@@ -92,14 +94,14 @@ public class PanelPlugin extends JavaPlugin {
         staticFileLocation("/public");
         port(httpPort);
 
-        // pages (temporary until the page manager is implemented
+        // pages
         new IndexGetter("/", "index.hbs", this);
         new SimplePageGetter("/files", "file-manager.hbs", this);
 
         // text only paths
         new StatsGetter("/stats");
-        new LoginPost("/login");
-        new ClientLoginPost("/auth");
+        new LoginPost("/login", logger);
+        new ClientLoginPost("/auth", logger);
         new FilePost("/file/*");
         new SwitchThemeGetter("/switchtheme");
         new FileGetter("/file/*");
@@ -154,12 +156,14 @@ public class PanelPlugin extends JavaPlugin {
                 sender.sendMessage("Creating user....");
                 String password = PasswordHash.generateStrongPasswordHash(args[1]);
 
-                PanelUser user = new PanelUser(password, false);
+                PanelUser user = new PanelUser(password, false, false, false);
 
                 sessions.addUser(args[0], user);
 
                 config.set("users." + args[0] + ".password", user.password);
                 config.set("users." + args[0] + ".canEditFiles", user.canEditFiles);
+                config.set("users." + args[0] + ".canChangeGroups", user.canChangeGroups);
+                config.set("users." + args[0] + ".canSendCommands", user.canSendCommands);
                 saveConfig();
 
                 sender.sendMessage("User created!");

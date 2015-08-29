@@ -52,11 +52,9 @@ public class ConsoleSocket extends WebSocketServer {
             for (String msg : oldMsgs) {
                 conn.send(msg);
             }
-            plugin.getServerLogger().log(Level.INFO, "Console user " + sockets.get(conn) + " logged in!");
         } else {
-            plugin.getServerLogger().log(Level.INFO, "Console user " + sockets.get(conn) + " failed to log in!");
-
-            conn.close(0, "AUTH CODE INCORRECT, PLEASE LOG IN");
+            conn.send("Failed to authenticate with the web socket!");
+            conn.close(0);
         }
 
         conn.send("Connected!");
@@ -69,14 +67,19 @@ public class ConsoleSocket extends WebSocketServer {
 
     @Override
     public void onMessage(WebSocket conn, String message) {
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(), message);
-            }
-        }.runTask(plugin);
+        if (!sessions.getAuthedUser(sockets.get(conn)).canSendCommands) {
+            conn.send("You're not allowed to send commands! Contact the server admin if this is in error.");
+        } else {
 
-        plugin.getServerLogger().log(Level.INFO, "Console user " + sockets.get(conn) + " ran the command " + message);
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(), message);
+                }
+            }.runTask(plugin);
+
+            plugin.getServerLogger().log(Level.INFO, "Console user " + sockets.get(conn) + " ran the command " + message);
+        }
     }
 
 

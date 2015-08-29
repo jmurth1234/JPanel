@@ -1,6 +1,8 @@
 package net.rymate.jpanel.posters;
 
 import net.rymate.jpanel.Utils.PasswordHash;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.Logger;
 import spark.Request;
 import spark.Response;
 
@@ -12,8 +14,11 @@ import java.util.UUID;
  * Created by Ryan on 07/07/2015.
  */
 public class ClientLoginPost extends PosterBase {
-    public ClientLoginPost(String path) {
+    private Logger logger;
+
+    public ClientLoginPost(String path, Logger logger) {
         super(path);
+        this.logger = logger;
     }
 
     @Override
@@ -26,8 +31,10 @@ public class ClientLoginPost extends PosterBase {
                 UUID sessionId = UUID.randomUUID();
                 getSessions().addSession(sessionId.toString(), username);
                 response.cookie("loggedin", sessionId.toString(), 3600);
+                logger.log(Level.INFO, "JPanel user " + username + " logged in! IP: " + request.ip());
                 return "SUCCESS: " + sessionId.toString();
             } else {
+                logger.log(Level.INFO, "Someone failed to login with the user " + username + "! IP: " + request.ip());
                 return "FAIL - PASSWORD INCORRECT";
             }
         } catch (Exception e) {

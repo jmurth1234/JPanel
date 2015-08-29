@@ -176,8 +176,22 @@ public class PlayerManagerPlus extends PosterBase {
                 }
 
             } else if (action.equals("addgroup")) {
+                HashMap resultMap = new HashMap();
+
+                if (!getSessions().getAuthedUser(request.cookie("loggedin")).canChangeGroups) {
+                    resultMap.put("success", false);
+                    resultMap.put("reason", "You're not allowed to modify groups!");
+
+                    responseMap.put("result", resultMap);
+                    return responseMap;
+                }
+
                 if (!permission.hasGroupSupport()) {
-                    return "your permissions plugin has no groups support";
+                    resultMap.put("success", false);
+                    resultMap.put("reason", "Your permissions plugin has no groups support!");
+
+                    responseMap.put("result", resultMap);
+                    return responseMap;
                 }
 
                 UUID target;
@@ -204,7 +218,6 @@ public class PlayerManagerPlus extends PosterBase {
                 if (plugin.getServer().getOfflinePlayer(target).isOnline()) {
                     Player player = plugin.getServer().getPlayer(target);
 
-                    HashMap resultMap = new HashMap();
                     boolean success;
                     if (world.equals("")) {
                         success = permission.playerAddGroup(player, value);
@@ -212,6 +225,10 @@ public class PlayerManagerPlus extends PosterBase {
                         success = permission.playerAddGroup(world, player, value);
                     }
 
+                    if (!success) {
+                        resultMap.put("reason", "An error occured!!");
+                    }
+
                     resultMap.put("success", success);
                     resultMap.put("world", player.getWorld().getName());
 
@@ -223,16 +240,27 @@ public class PlayerManagerPlus extends PosterBase {
                         return "Please specify a world for offline players!";
                     }
 
-                    HashMap resultMap = new HashMap();
-
                     resultMap.put("success", permission.playerAddGroup(world, player, value));
                     resultMap.put("world", world);
 
-                    responseMap.put("result", resultMap);
+                    if ( !((boolean)resultMap.get("success")) ) {
+                        resultMap.put("reason", "An error occured!!");
+                    }
 
+                    responseMap.put("result", resultMap);
                 }
 
             } else if (action.equals("rmgroup")) {
+                HashMap resultMap = new HashMap();
+
+                if (!getSessions().getAuthedUser(request.cookie("loggedin")).canChangeGroups) {
+                    resultMap.put("success", false);
+                    resultMap.put("reason", "You're not allowed to modify groups!");
+
+                    responseMap.put("result", resultMap);
+                    return responseMap;
+                }
+
                 if (!permission.hasGroupSupport()) {
                     return "your permissions plugin has no groups support";
                 }
@@ -261,7 +289,6 @@ public class PlayerManagerPlus extends PosterBase {
                 if (plugin.getServer().getOfflinePlayer(target).isOnline()) {
                     Player player = plugin.getServer().getPlayer(target);
 
-                    HashMap resultMap = new HashMap();
                     boolean success;
                     if (world.equals("")) {
                         success = permission.playerRemoveGroup(player, value);
@@ -269,10 +296,13 @@ public class PlayerManagerPlus extends PosterBase {
                         success = permission.playerRemoveGroup(world, player, value);
                     }
 
+                    if (!success) {
+                        resultMap.put("reason", "An error occured!!");
+                    }
+
                     resultMap.put("success", success);
                     resultMap.put("world", player.getWorld().getName());
 
-                    responseMap.put("result", resultMap);
 
                 } else {
                     OfflinePlayer player = plugin.getServer().getOfflinePlayer(target);
@@ -280,15 +310,15 @@ public class PlayerManagerPlus extends PosterBase {
                         return "Please specify a world for offline players!";
                     }
 
-                    HashMap resultMap = new HashMap();
-
                     resultMap.put("success", permission.playerRemoveGroup(world, player, value));
                     resultMap.put("world", world);
 
-                    responseMap.put("result", resultMap);
-
+                    if ( !((boolean)resultMap.get("success")) ) {
+                        resultMap.put("reason", "An error occured!!");
+                    }
                 }
 
+                responseMap.put("result", resultMap);
             }
         }
 
