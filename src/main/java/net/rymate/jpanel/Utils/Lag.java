@@ -17,9 +17,14 @@ public class Lag implements Runnable {
             return 20.0D;
         }
         int target = (TICK_COUNT - 1 - ticks) % TICKS.length;
-        long elapsed = System.currentTimeMillis() - TICKS[target];
 
-        return ticks / (elapsed / 1000.0D);
+        boolean inBounds = (target >= 0) && (target < TICKS.length);
+        if (inBounds) {
+            long elapsed = System.currentTimeMillis() - TICKS[target];
+            return ticks / (elapsed / 1000.0D);
+        } else {
+            return 20.0D;
+        }
     }
 
     public static long getElapsed(int tickID) {

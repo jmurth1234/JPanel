@@ -99,6 +99,7 @@ $(document).ready(function () {
                     term.scrollTop(term.prop("scrollHeight"));
                 }
             }
+
         }});
 
     $("#cmd_box").on('keypress', function (event) {
