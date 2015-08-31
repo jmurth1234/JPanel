@@ -25,8 +25,9 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
     releaseJars group: 'com.sparkjava', name: 'spark-core', version: '2.2'
     releaseJars 'com.sparkjava:spark-template-handlebars:1.0.0'
-    releaseJars group: 'com.google.code.gson', name: 'gson', version: '2.2.4'
+    releaseJars 'com.google.code.gson:gson:2.2.4'
 
+    compile 'com.google.code.gson:gson:2.2.4'
     compile group: 'com.sparkjava', name: 'spark-core', version: '2.2'
     compile 'com.sparkjava:spark-template-handlebars:1.0.0'
     compile group: 'org.bukkit', name: 'bukkit', version: '1.8.7-R0.1-SNAPSHOT'

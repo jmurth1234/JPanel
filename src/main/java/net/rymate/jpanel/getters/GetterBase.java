@@ -3,12 +3,12 @@ package net.rymate.jpanel.getters;
 import net.rymate.jpanel.PanelNavigation;
 import net.rymate.jpanel.PanelPlugin;
 import net.rymate.jpanel.PanelSessions;
+import net.rymate.jpanel.Utils.HandlebarsTemplateEngine;
 import org.bukkit.plugin.java.JavaPlugin;
 import spark.ModelAndView;
 import spark.Request;
 import spark.Response;
 import spark.ResponseTransformer;
-import spark.template.handlebars.HandlebarsTemplateEngine;
 
 import java.util.HashMap;
 import java.util.Map;

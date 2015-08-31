@@ -68,8 +68,7 @@ public class PlayerManagerPlus extends PosterBase {
                     responseMap.put("result", groupsList);
                 } else if (type.equals("online_players")) {
                     ArrayList<TinyPlayer> playersList = new ArrayList<>();
-                    Collection<? extends Player> players = plugin.getServer().getOnlinePlayers();
-                    for (Player player : players) {
+                    for (Player player : plugin.getServer().getOnlinePlayers()) {
                         TinyPlayer p = new TinyPlayer();
                         p.playerName = player.getName();
                         p.playerUuid = player.getUniqueId().toString();
