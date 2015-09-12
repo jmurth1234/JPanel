@@ -31,10 +31,10 @@ public class ClientLoginPost extends PosterBase {
                 UUID sessionId = UUID.randomUUID();
                 getSessions().addSession(sessionId.toString(), username);
                 response.cookie("loggedin", sessionId.toString(), 3600);
-                logger.log(Level.INFO, "JPanel user " + username + " logged in! IP: " + request.ip());
+                logger.log(Level.DEBUG, "JPanel user " + username + " logged in! IP: " + request.ip());
                 return "SUCCESS: " + sessionId.toString();
             } else {
-                logger.log(Level.INFO, "Someone failed to login with the user " + username + "! IP: " + request.ip());
+                logger.log(Level.DEBUG, "Someone failed to login with the user " + username + "! IP: " + request.ip());
                 return "FAIL - PASSWORD INCORRECT";
             }
         } catch (Exception e) {

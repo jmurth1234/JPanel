@@ -1,0 +1,7 @@
+name: jPanel test
+version: 1.0-SNAPSHOT
+description: Adds apage to jPanel
+author: rymate1234
+
+main: net.rymate.test.MainClass
+softdepend: [jPanel]

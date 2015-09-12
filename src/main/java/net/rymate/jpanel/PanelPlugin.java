@@ -111,7 +111,6 @@ public class PanelPlugin extends JavaPlugin {
         nav.registerPath("/", "Home");
         nav.registerPath("/players", "Players");
         nav.registerPath("/files", "Files");
-        nav.registerPath("/logout", "Logout");
 
         if (getServer().getPluginManager().isPluginEnabled("Vault")) {
             //PanelNavigation.getInstance().registerPath("/permissions", "Permissions");

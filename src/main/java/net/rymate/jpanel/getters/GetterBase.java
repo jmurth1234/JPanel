@@ -10,6 +10,7 @@ import spark.Request;
 import spark.Response;
 import spark.ResponseTransformer;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,6 +36,13 @@ public abstract class GetterBase {
         this.plugin = plugin;
         this.template = template;
         get(path, (request, response) -> getPage(request, response), new HandlebarsTemplateEngine());
+    }
+
+    public GetterBase(String path, File template, JavaPlugin plugin) {
+        sessions = PanelSessions.getInstance();
+        this.plugin = plugin;
+        this.template = template.getName();
+        get(path, (request, response) -> getPage(request, response), new HandlebarsTemplateEngine(template));
     }
 
     protected Object getText(Request request, Response response) throws Exception {

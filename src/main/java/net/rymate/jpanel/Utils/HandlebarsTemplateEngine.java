@@ -20,8 +20,11 @@ package net.rymate.jpanel.Utils;
  *
  */
 
+import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 
+import com.github.jknack.handlebars.io.FileTemplateLoader;
 import org.eclipse.jetty.io.RuntimeIOException;
 
 import spark.ModelAndView;
@@ -40,6 +43,7 @@ import com.github.jknack.handlebars.io.TemplateLoader;
  */
 public class HandlebarsTemplateEngine extends TemplateEngine {
 
+    private File file;
     private Handlebars handlebars;
 
     /**
@@ -62,10 +66,27 @@ public class HandlebarsTemplateEngine extends TemplateEngine {
         handlebars = new Handlebars(templateLoader);
     }
 
+    public HandlebarsTemplateEngine(File template) {
+        this.file = template;
+        TemplateLoader templateLoader = new FileTemplateLoader(file.getParentFile());
+        templateLoader.setSuffix(null);
+
+        handlebars = new Handlebars(templateLoader);
+    }
+
     @Override
     public String render(ModelAndView modelAndView) {
         String viewName = modelAndView.getViewName();
         try {
+            if (viewName.equals("login.hbs")) {
+                TemplateLoader templateLoader = new ClassPathTemplateLoader();
+                templateLoader.setPrefix("/templates");
+                templateLoader.setSuffix(null);
+
+                Handlebars renderer = new Handlebars(templateLoader);
+                Template template = renderer.compile(viewName);
+                return template.apply(modelAndView.getModel());
+            }
             Template template = handlebars.compile(viewName);
             return template.apply(modelAndView.getModel());
         } catch (IOException e) {

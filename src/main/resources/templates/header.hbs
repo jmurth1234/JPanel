@@ -1,12 +1,24 @@
+<!-- Dropdown Structure -->
+<ul id="plugins-dropdown" class="dropdown-content">
+    {{#each extras}}
+        <li><a href="{{this.path}}">{{this.name}}</a></li>
+    {{/each}}
+</ul>
+
 
 <nav>
     <div class="nav-wrapper container">
         <a href="#" data-activates="mobile-demo" class="button-collapse"><i class="material-icons">menu</i></a>
         <a href="/" class="brand-logo">JPanel</a>
         <ul id="nav-mobile" class="right hide-on-med-and-down">
-        {{#each paths}}
-            <li><a href="{{this.path}}">{{this.name}}</a></li>
-        {{/each}}
+            {{#each paths}}
+                <li><a href="{{this.path}}">{{this.name}}</a></li>
+            {{/each}}
+
+            {{#if isExtras}}
+                <li><a class="dropdown-button" href="#!" data-activates="plugins-dropdown">Plugin Pages<i class="material-icons right">arrow_drop_down</i></a></li>
+            {{/if}}
+            <li><a href="/logout" title="Logout">Logout</a></li>
             <li><a href="/switchtheme" title="Change Theme"><i class="material-icons">settings_brightness</i></a></li>
         </ul>
 
@@ -14,6 +26,15 @@
             {{#each paths}}
                 <li><a href="{{this.path}}">{{this.name}}</a></li>
             {{/each}}
+            <li class="divider"></li>
+
+            {{#each extras}}
+                <li><a href="{{this.path}}">{{this.name}}</a></li>
+            {{/each}}
+
+            <li class="divider"></li>
+            <li><a href="/logout" title="Logout">Logout</a></li>
+
             <li><a href="/switchtheme">Change Theme</a></li>
         </ul>
     </div>
