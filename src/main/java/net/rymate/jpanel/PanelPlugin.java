@@ -6,7 +6,6 @@ import net.rymate.jpanel.getters.*;
 import net.rymate.jpanel.posters.ClientLoginPost;
 import net.rymate.jpanel.posters.FilePost;
 import net.rymate.jpanel.posters.LoginPost;
-import net.rymate.jpanel.getters.PlayerManagerPath;
 import net.rymate.jpanel.posters.PlayerManagerPlus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
@@ -21,14 +20,17 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.java_websocket.drafts.Draft_17;
 
-import java.io.IOException;
+import java.io.*;
 import java.net.UnknownHostException;
+import java.util.Enumeration;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 import static spark.Spark.*;
 
 /**
  * Main Class of JPanel
- *
+ * <p>
  * Created by Ryan on 22/06/2015.
  */
 public class PanelPlugin extends JavaPlugin {
@@ -61,6 +63,7 @@ public class PanelPlugin extends JavaPlugin {
     public void onEnable() {
         Lag lag = Lag.getInstance();
         sessions = PanelSessions.getInstance();
+        extractResources(getClass(), "public");
 
         getServer().getScheduler().scheduleSyncRepeatingTask(this, lag, 100L, 1L);
 
@@ -91,7 +94,8 @@ public class PanelPlugin extends JavaPlugin {
         // init spark server
         //setupSpark();
 
-        staticFileLocation("/public");
+        //staticFileLocation("/public");
+        externalStaticFileLocation(new File(".").getAbsolutePath() + "/JPanel-public/");
         port(httpPort);
 
         // pages
@@ -225,7 +229,7 @@ public class PanelPlugin extends JavaPlugin {
     private void setupWS() {
         System.out.println("Starting WebSocket server...");
         try {
-            socket = new ConsoleSocket( socketPort, new Draft_17(), this );
+            socket = new ConsoleSocket(socketPort, new Draft_17(), this);
             socket.start();
         } catch (UnknownHostException e) {
             e.printStackTrace();
@@ -258,5 +262,51 @@ public class PanelPlugin extends JavaPlugin {
             return socketPath;
         else
             return String.valueOf(socketPort);
+    }
+
+    public void extractResources(Class<? extends JavaPlugin> pluginClass, String filePath) {
+        try {
+            File dest = new File(new File(".").getAbsolutePath() + "/JPanel-public/");
+
+            if (!dest.exists()) {
+                dest.mkdir();
+                dest.setWritable(true);
+            }
+
+            File jarFile = new File(pluginClass.getProtectionDomain().getCodeSource().getLocation().getPath());
+
+            if (jarFile.isFile()) {
+                JarFile jar;
+                jar = new JarFile(jarFile);
+
+                Enumeration<JarEntry> entries = jar.entries();
+                while (entries.hasMoreElements()) {
+                    String name = entries.nextElement().getName();
+                    if (name.startsWith(filePath + "/")) {
+                        InputStream in = getResource(name);
+                        name = name.replace(filePath + "/", "");
+                        File outFile = new File(dest + "/" + name);
+                        if (name.endsWith("/")) {
+                            outFile.mkdirs();
+                        } else {
+                            if (outFile.isDirectory()) continue;
+
+                            if (!outFile.exists()) outFile.createNewFile();
+                            OutputStream out = new FileOutputStream(outFile);
+                            byte[] buf = new byte[1024];
+                            int len;
+                            while ((len = in.read(buf)) > 0) {
+                                out.write(buf, 0, len);
+                            }
+                            out.close();
+                        }
+                        in.close();
+                    }
+                }
+                jar.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
