@@ -21,6 +21,8 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.java_websocket.drafts.Draft_17;
 
 import java.io.*;
+import java.net.URL;
+import java.net.URLConnection;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
@@ -264,7 +266,7 @@ public class PanelPlugin extends JavaPlugin {
             return String.valueOf(socketPort);
     }
 
-    public void extractResources(Class<? extends JavaPlugin> pluginClass, String filePath) {
+    public static void extractResources(Class<? extends JavaPlugin> pluginClass, String filePath) {
         try {
             File dest = new File(new File(".").getAbsolutePath() + "/JPanel-public/");
 
@@ -283,7 +285,7 @@ public class PanelPlugin extends JavaPlugin {
                 while (entries.hasMoreElements()) {
                     String name = entries.nextElement().getName();
                     if (name.startsWith(filePath + "/")) {
-                        InputStream in = getResource(name);
+                        InputStream in = getResourceFromJar(name, pluginClass.getClassLoader());
                         name = name.replace(filePath + "/", "");
                         File outFile = new File(dest + "/" + name);
                         if (name.endsWith("/")) {
@@ -307,6 +309,27 @@ public class PanelPlugin extends JavaPlugin {
             }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    // extracted from Bukkit API
+    public static InputStream getResourceFromJar(String filename, ClassLoader classLoader) {
+        if (filename == null) {
+            throw new IllegalArgumentException("Filename cannot be null");
+        }
+
+        try {
+            URL url = classLoader.getResource(filename);
+
+            if (url == null) {
+                return null;
+            }
+
+            URLConnection connection = url.openConnection();
+            connection.setUseCaches(false);
+            return connection.getInputStream();
+        } catch (IOException ex) {
+            return null;
         }
     }
 }
