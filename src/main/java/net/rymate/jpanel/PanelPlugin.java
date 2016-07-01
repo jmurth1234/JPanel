@@ -18,7 +18,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.java_websocket.drafts.Draft_17;
 
 import java.io.*;
 import java.net.URL;
@@ -39,26 +38,22 @@ public class PanelPlugin extends JavaPlugin {
 
     private static final java.util.logging.Logger log = java.util.logging.Logger.getLogger("Minecraft-Server");
     private static final org.apache.logging.log4j.core.Logger logger = (org.apache.logging.log4j.core.Logger) LogManager.getRootLogger();
-    private ConsoleSocket socket;
+	private static PanelPlugin instance;
+	private ConsoleSocket socket;
     private FileConfiguration config;
 
     private int httpPort = 4567;
-    private int socketPort = 9003;
     private String socketPath = "";
 
     private PanelSessions sessions;
 
+	public static PanelPlugin getInstance() {
+		return instance;
+	}
 
-    public void onDisable() {
+	public void onDisable() {
         stop();
-        try {
-            socket.stop();
-            socket = null;
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+
         sessions.destroy();
     }
 
@@ -66,6 +61,7 @@ public class PanelPlugin extends JavaPlugin {
         Lag lag = Lag.getInstance();
         sessions = PanelSessions.getInstance();
         extractResources(getClass(), "public");
+		instance = this;
 
         getServer().getScheduler().scheduleSyncRepeatingTask(this, lag, 100L, 1L);
 
@@ -84,24 +80,19 @@ public class PanelPlugin extends JavaPlugin {
         }
 
         config.set("http-port", config.get("http-port", httpPort));
-        config.set("websocket-port", config.get("websocket-port", socketPort));
-        config.set("websocket-path", config.get("websocket-path", socketPath));
 
         httpPort = config.getInt("http-port");
-        socketPort = config.getInt("websocket-port");
-        socketPath = config.getString("websocket-path");
 
         saveConfig();
 
-        // init spark server
-        //setupSpark();
+		webSocket("/socket", ConsoleSocket.class);
 
         //staticFileLocation("/public");
         externalStaticFileLocation(new File(".").getAbsolutePath() + "/JPanel-public/");
         port(httpPort);
 
         // pages
-        new IndexGetter("/", "index.hbs", this);
+        new SimplePageGetter("/", "index.hbs", this);
         new SimplePageGetter("/files", "file-manager.hbs", this);
 
         // text only paths
@@ -127,9 +118,6 @@ public class PanelPlugin extends JavaPlugin {
             new PlayersGetter("/players", this);
             new PlayerManagerPath("/player/:name/:action", this);
         }
-
-
-        setupWS();
 
         System.out.println("[JPanel] JPanel enabled!");
     }
@@ -228,17 +216,6 @@ public class PanelPlugin extends JavaPlugin {
         return false;
     }
 
-    private void setupWS() {
-        System.out.println("Starting WebSocket server...");
-        try {
-            socket = new ConsoleSocket(socketPort, new Draft_17(), this);
-            socket.start();
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
-        System.out.println("Started WebSocket server!");
-    }
-
     public synchronized void managePlayer(String name, String action) {
         new BukkitRunnable() {
             @Override
@@ -257,13 +234,6 @@ public class PanelPlugin extends JavaPlugin {
 
     public Logger getServerLogger() {
         return logger;
-    }
-
-    public String getWebSocketPort() {
-        if (!socketPath.equals(""))
-            return socketPath;
-        else
-            return String.valueOf(socketPort);
     }
 
     public static void extractResources(Class<? extends JavaPlugin> pluginClass, String filePath) {

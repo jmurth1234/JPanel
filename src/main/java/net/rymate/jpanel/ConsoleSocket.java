@@ -3,10 +3,12 @@ package net.rymate.jpanel;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.LogEvent;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.java_websocket.WebSocket;
-import org.java_websocket.drafts.Draft;
-import org.java_websocket.handshake.ClientHandshake;
-import org.java_websocket.server.WebSocketServer;
+
+import org.eclipse.jetty.websocket.api.*;
+import org.eclipse.jetty.websocket.api.annotations.*;
+import java.io.*;
+import java.util.*;
+import java.util.concurrent.*;
 
 import java.net.HttpCookie;
 import java.net.InetSocketAddress;
@@ -22,55 +24,58 @@ import org.apache.logging.log4j.core.appender.AbstractAppender;
  * <p>
  * Created by ryan on 24/06/15.
  */
-public class ConsoleSocket extends WebSocketServer {
+
+@WebSocket
+public class ConsoleSocket {
     private final PanelSessions sessions;
     private PanelPlugin plugin;
     private ArrayList<String> oldMsgs = new ArrayList();
-    private HashMap<WebSocket, String> sockets = new HashMap<>();
 
+	private ConcurrentHashMap<Session, String> sockets = new ConcurrentHashMap<>();
 
-    public ConsoleSocket(int port, Draft d, PanelPlugin panelPlugin) throws UnknownHostException {
-        super(new InetSocketAddress(port), Collections.singletonList(d));
-        this.plugin = panelPlugin;
+    public ConsoleSocket() throws UnknownHostException {
+        this.plugin = PanelPlugin.getInstance();
         sessions = PanelSessions.getInstance();
         plugin.getServerLogger().addAppender(new LogHandler(this));
-    }
+		plugin.getServerLogger().info("[JPanel] WebSocket started");
+	}
 
-    @Override
-    public void onOpen(WebSocket conn, ClientHandshake handshake) {
-        String cookieString = handshake.getFieldValue("Cookie");
-        String[] cookies = cookieString.split("\\;");
-        String token = "";
-        for (String cookie : cookies) {
-            if (cookie.contains("loggedin")) {
-                token = cookie.split("=")[1];
-            }
-        }
-        if (sessions.isLoggedIn(token)) {
-            sockets.put(conn, sessions.getAuthedUsername(token));
-            conn.send("SCROLLBACK " + oldMsgs.size());
-            for (String msg : oldMsgs) {
-                conn.send(msg);
-            }
-        } else {
-            conn.send("Failed to authenticate with the web socket!");
-            conn.close(0);
-        }
+	@OnWebSocketConnect
+	public void connected(Session session) throws IOException {
+		List<HttpCookie> cookies = session.getUpgradeRequest().getCookies();
+		String token = "";
 
-        conn.send("Connected!");
-    }
+		for (HttpCookie cookie : cookies) {
+			if (cookie.getName().equalsIgnoreCase("loggedin")) {
+				token = cookie.getValue();
+			}
+		}
 
-    @Override
-    public void onClose(WebSocket conn, int code, String reason, boolean remote) {
-        sockets.remove(conn);
-    }
+		if (sessions.isLoggedIn(token)) {
+			sockets.put(session, sessions.getAuthedUsername(token));
+			session.getRemote().sendString("SCROLLBACK " + oldMsgs.size());
+			for (String msg : oldMsgs) {
+				session.getRemote().sendString(msg);
+			}
+			session.getRemote().sendString("Connected!");
+		} else {
+			session.getRemote().sendString("Failed to authenticate with the web socket!");
+			session.close();
+		}
+	}
 
-    @Override
-    public void onMessage(WebSocket conn, String message) {
-        String username = sockets.get(conn);
+
+	@OnWebSocketClose
+    public void onClose(Session session, int statusCode, String reason) {
+		sockets.remove(session);
+	}
+
+	@OnWebSocketMessage
+	public void message(Session session, String message) throws IOException {
+		String username = sockets.get(session);
 
         if (!sessions.getUser(username).canSendCommands) {
-            conn.send("You're not allowed to send commands! Contact the server admin if this is in error.");
+			session.getRemote().sendString("You're not allowed to send commands! Contact the server admin if this is in error.");
             return;
         }
 
@@ -85,20 +90,14 @@ public class ConsoleSocket extends WebSocketServer {
             plugin.getServerLogger().log(Level.INFO, "Console user " + username + " ran the command " + message);
     }
 
-
-    @Override
-    public void onError(WebSocket conn, Exception ex) {
-
-    }
-
-    public void appendMessage(String message) {
+    public void appendMessage(String message) throws IOException {
         oldMsgs.add(message);
         if (oldMsgs.size() > 1000) {
             oldMsgs.remove(0);
             oldMsgs.trimToSize();
         }
-        for (WebSocket socket : sockets.keySet()) {
-            socket.send(message);
+        for (Session socket : sockets.keySet()) {
+            socket.getRemote().sendString(message);
         }
     }
 
@@ -117,7 +116,11 @@ public class ConsoleSocket extends WebSocketServer {
             Date date = new Date();
             String message = event.getMessage().getFormattedMessage();
             //message = message.replaceAll("\\e\\[[\\d;]*[^\\d;]",""); // remove ansi characters as they don't work well
-            appendMessage(dateFormat.format(date) + " [" + event.getLevel().toString() + "] " + message);
-        }
+			try {
+				appendMessage(dateFormat.format(date) + " [" + event.getLevel().toString() + "] " + message);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
     }
 }
