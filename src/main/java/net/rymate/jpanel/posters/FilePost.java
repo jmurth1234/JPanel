@@ -3,6 +3,9 @@ package net.rymate.jpanel.posters;
 import spark.Request;
 import spark.Response;
 
+import javax.servlet.MultipartConfigElement;
+import javax.servlet.ServletException;
+import javax.servlet.http.Part;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -18,6 +21,9 @@ public class FilePost extends PosterBase{
 
     @Override
     Object getResponse(Request request, Response response) {
+		MultipartConfigElement multipartConfigElement = new MultipartConfigElement("/");
+		request.raw().setAttribute("org.eclipse.jetty.multipartConfig", multipartConfigElement);
+
         if (!isLoggedIn(request.cookie("loggedin")))
             return 0;
 
@@ -32,11 +38,17 @@ public class FilePost extends PosterBase{
 
         File file = new File(new File(".").getAbsolutePath() + "/" + splat);
 
-        if (!file.exists()) {
-            return false;
-        }
+        if (!file.exists()) try {
+			Part filePart = request.raw().getPart("upload-btn"); //file is name of the upload form
 
-        if (!file.isDirectory()) {
+			filePart.write(file.getAbsolutePath());
+			return true;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		} catch (ServletException e) { }
+
+		if (!file.isDirectory()) {
             String text = request.body();
             try {
                 file.delete();

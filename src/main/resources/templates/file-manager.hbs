@@ -125,8 +125,10 @@
                 <div id="file-list" class="collection">
 
                 </div>
-                <label class="waves-effect waves-light btn" for="upload-btn">Upload File</label>
-                <input id="upload-btn" name="upload-btn" type="file" class="inputfile"/>
+				<form id="uploadForm">
+					<label id="upload-btn-label" class="waves-effect waves-light btn" for="upload-btn">Upload File</label>
+					<input id="upload-btn" name="upload-btn" type="file" class="inputfile"/>
+				</form>
             </div>
             <div class="col s12 m8">
                 <pre id="editor"></pre>
@@ -176,6 +178,7 @@
     </div>
 </script>
 
+<iframe id="download" style="display:none;"></iframe>
 
 
 <!--Import jQuery before materialize.js-->

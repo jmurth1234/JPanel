@@ -19,6 +19,26 @@ $(document).ready(function () {
         }});
 });
 
+function loadCurrentDir() {
+	$.ajax({
+		url: "/file/" + currentDir,
+		success: function (result) {
+			var result = JSON.parse(result);
+			var fileList = $("#file-list");
+			fileList.html("");
+			var folder = {"folder": ".."};
+			fileList.append(tmpl("item_tmpl", folder));
+			for (var i = 0; i < result.folders.length; i++) {
+				var folder = {"folder": result.folders[i]};
+				fileList.append(tmpl("item_tmpl", folder));
+			}
+			for (var i = 0; i < result.files.length; i++) {
+				var file = {"file": result.files[i]};
+				fileList.append(tmpl("file_tmpl", file));
+			}
+		}});
+}
+
 function openFolder(folder) {
     if (folder == "..") {
         var folders = currentDir.split("/");
@@ -29,25 +49,44 @@ function openFolder(folder) {
     }
 
     console.log(currentDir);
-    $.ajax({
-        url: "/file/" + currentDir,
-        success: function (result) {
-            var result = JSON.parse(result);
-            var fileList = $("#file-list");
-            fileList.html("");
-            var folder = {"folder": ".."};
-            fileList.append(tmpl("item_tmpl", folder));
-            for (var i = 0; i < result.folders.length; i++) {
-                var folder = {"folder": result.folders[i]};
-                fileList.append(tmpl("item_tmpl", folder));
-            }
-            for (var i = 0; i < result.files.length; i++) {
-                var file = {"file": result.files[i]};
-                fileList.append(tmpl("file_tmpl", file));
-            }
-        }});
+
+	loadCurrentDir();
+
 }
 
+$("#upload-btn").change(function(){
+	var file = this.files[0];
+	var name = file.name;
+
+	var formData = new FormData($('#uploadForm')[0]);
+	$.ajax({
+		url: "/file/" + currentDir + "/" + name,
+		type: 'POST',
+		xhr: function() {  // Custom XMLHttpRequest
+			var myXhr = $.ajaxSettings.xhr();
+
+			function onProgress(e) {
+				$('#upload-btn-label').text("Uploading " + name + ": " + e.loaded);
+			}
+
+			if(myXhr.upload) { // Check if upload property exists
+				myXhr.upload.addEventListener('progress', onProgress, false); // For handling the progress of the upload
+			}
+			return myXhr;
+		},
+		//Ajax events
+		success: function () {
+			$('#upload-btn-label').text("Upload File");
+			alert("File uploaded");
+		},
+		// Form data
+		data: formData,
+		//Options to tell jQuery not to process data or worry about content-type.
+		cache: false,
+		contentType: false,
+		processData: false
+	});
+});
 
 function openFile(file) {
     currentFile = currentDir + "/" + file;
@@ -84,7 +123,6 @@ function saveFile() {
 //
 //////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
-
 /**
  * Function to check if we clicked inside an element with a particular class
  * name.
@@ -279,14 +317,56 @@ function positionMenu(e) {
 }
 
 /**
- * Dummy action function that logs an action when a menu item link is clicked
+ * function that sends an action to the server when a menu item link is clicked
  *
  * @param {HTMLElement} link The link that was clicked
  */
 function menuItemListener( link ) {
-    console.log( "File type - " + taskItemInContext.getAttribute("data-filetype") + ", File path - " + taskItemInContext.getAttribute("data-filepath"));
+	currentFile = currentDir + "/" + taskItemInContext.getAttribute("data-filepath");
+
+	console.log( "File type - " + taskItemInContext.getAttribute("data-filetype") + ", File path - " + currentFile);
     console.log( "Link action - " + link.getAttribute("data-action"));
-    toggleMenuOff();
+
+	var file_action = {
+		"action": link.getAttribute("data-action"),
+		"type": taskItemInContext.getAttribute("data-filetype"),
+		"target": currentFile,
+	};
+
+	if (file_action.action == "Remove" && !confirm("Are you sure you want to delete this file?")) {
+		return;
+	}
+
+	if (file_action.action == "Rename") {
+		file_action["value"] = prompt("What would you like to rename this file to?", taskItemInContext.getAttribute("data-filepath"));
+	}
+
+	if (file_action.action == "Download") {
+		// fun
+		document.getElementById('download').src = window.location.protocol + "//" + document.domain + ":" + window.location.port + "/file/" + currentFile;
+		return;
+	}
+
+
+	$.ajax({
+		url: "/files/manager",
+		type: 'POST',
+		contentType: 'application/json; charset=utf-8',
+		dataType: 'json',
+		data: JSON.stringify(file_action),
+		success: function (result) {
+			var res = result;
+			if (res.success) {
+				alert(file_action.action + " successful!");
+			} else {
+				alert(res.reason);
+			}
+		}
+	});
+
+	loadCurrentDir();
+
+	toggleMenuOff();
 }
 
 /**

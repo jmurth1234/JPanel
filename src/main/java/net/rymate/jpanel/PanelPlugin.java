@@ -3,10 +3,7 @@ package net.rymate.jpanel;
 import net.rymate.jpanel.Utils.Lag;
 import net.rymate.jpanel.Utils.PasswordHash;
 import net.rymate.jpanel.getters.*;
-import net.rymate.jpanel.posters.ClientLoginPost;
-import net.rymate.jpanel.posters.FilePost;
-import net.rymate.jpanel.posters.LoginPost;
-import net.rymate.jpanel.posters.PlayerManagerPlus;
+import net.rymate.jpanel.posters.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
 import org.bukkit.command.Command;
@@ -103,6 +100,7 @@ public class PanelPlugin extends JavaPlugin {
         new FilePost("/file/*");
         new SwitchThemeGetter("/switchtheme");
         new FileGetter("/file/*");
+		new FileManager("/files/manager", this);
 
         PanelNavigation nav = PanelNavigation.getInstance();
         nav.registerPath("/", "Home");

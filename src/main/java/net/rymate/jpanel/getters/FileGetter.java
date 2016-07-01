@@ -23,7 +23,7 @@ public class FileGetter extends GetterBase {
     }
 
     @Override
-    protected Object getText(Request request, Response response) {
+    protected Object getText(Request request, Response response) throws IOException {
         if (!isLoggedIn(request.cookie("loggedin")))
             return 0;
 
@@ -53,13 +53,17 @@ public class FileGetter extends GetterBase {
                 }
             }
         } else {
+			response.raw().setContentType("application/octet-stream");
+			response.raw().setHeader("Content-Disposition","attachment; filename=" + file.getName());
+
             byte[] encoded = new byte[0];
             try {
                 encoded = Files.readAllBytes(Paths.get(file.getAbsolutePath()));
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            return new String(encoded, Charset.defaultCharset());
+
+            return encoded;
         }
 
         Collections.sort(folders, String.CASE_INSENSITIVE_ORDER);
