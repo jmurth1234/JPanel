@@ -3,7 +3,6 @@
 <head>
     <!--Import materialize.css-->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.96.1/css/materialize.min.css">
-    <link rel="stylesheet" href="/term.css">
     {{#if dark}}
         <link rel="stylesheet" href="/dark.css">
     {{/if}}
@@ -30,7 +29,7 @@
         }
 
         .collection {
-            height: calc(100vh - 84px);
+            height: calc(100vh - 144px);
             overflow: auto;
         }
 
@@ -58,6 +57,59 @@
             margin-bottom: 0px;
         }
 
+        /* context menu */
+
+        .context-menu {
+            display: none;
+            position: absolute;
+            z-index: 10;
+            padding: 0px;
+            width: 160px;
+            background-color: #fff;
+            border: solid 1px #dfdfdf;
+            box-shadow: 1px 1px 2px #cfcfcf;
+        }
+
+        .context-menu--active {
+            display: block;
+        }
+
+        .context-menu__items {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .context-menu__item {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .context-menu__item:last-child {
+            margin-bottom: 0;
+        }
+
+        .context-menu__link {
+            display: block;
+            padding: 4px 12px;
+            color: #0066aa;
+            text-decoration: none;
+        }
+
+        .context-menu__link:hover {
+            color: #fff;
+            background-color: #0066aa;
+        }
+
+        .inputfile {
+            width: 0.1px;
+            height: 0.1px;
+            opacity: 0;
+            overflow: hidden;
+            position: absolute;
+            z-index: -1;
+        }
+
 
     </style>
 </head>
@@ -73,7 +125,8 @@
                 <div id="file-list" class="collection">
 
                 </div>
-
+                <label class="waves-effect waves-light btn" for="upload-btn">Upload File</label>
+                <input id="upload-btn" name="upload-btn" type="file" class="inputfile"/>
             </div>
             <div class="col s12 m8">
                 <pre id="editor"></pre>
@@ -83,8 +136,22 @@
     </div>
 </main>
 
+<div id="context-menu" class="context-menu">
+    <ul class="context-menu__items">
+        <li class="context-menu__item">
+            <a href="#" class="context-menu__link" data-action="Rename">Rename File</a>
+        </li>
+        <li class="context-menu__item">
+            <a href="#" class="context-menu__link" data-action="Download">Download File</a>
+        </li>
+        <li class="context-menu__item">
+            <a href="#" class="context-menu__link" data-action="Remove">Remove File</a>
+        </li>
+    </ul>
+</div>
+
 <script type="text/html" id="item_tmpl">
-    <div onclick="openFolder('<%=folder%>')" class="collection-item avatar valign-wrapper">
+    <div data-filetype="folder" data-filepath="<%=folder%>" onclick="openFolder('<%=folder%>')" class="collection-item avatar valign-wrapper">
         <div class="col">
             <i class="material-icons yellow-text circle">folder</i>
         </div>
@@ -97,7 +164,7 @@
 </script>
 
 <script type="text/html" id="file_tmpl">
-    <div onclick="openFile('<%=file%>')" class="collection-item avatar valign-wrapper">
+    <div data-filetype="file" data-filepath="<%=file%>" onclick="openFile('<%=file%>')" class="collection-item avatar valign-wrapper">
         <div class="col">
             <i class="material-icons circle">description</i>
         </div>

@@ -57,50 +57,42 @@ function ansiformat(data) {
 
 
 $(document).ready(function () {
-    var socket;
     var scrollback;
     var fragment = document.createDocumentFragment();
     var term = $('#term-content');
-    $(".nano").nanoScroller({ scroll: 'bottom' });
-    $.ajax({
-        url: "/wsport",
-        success: function (result) {
-            if (result == parseInt(result, 10)) {
-                socket = new WebSocket("ws://" + document.domain + ":" + result + "/");
-            } else {
-                socket = new WebSocket("wss://" + document.domain + "/" + result + "/");
-            }
 
-            socket.onmessage = function (event) {
-                if (event.data.contains("SCROLLBACK")) {
-                    dataArray = event.data.split(" ");
-                    scrollback = dataArray[1];
-                }
+	var protocol = window.location.protocol != "https:" ? "ws" : "wss";
 
-                if (scrollback > 0) {
-                    var newLine = document.createElement('p');
-                    newLine.className = "term_line";
-                    newLine.innerHTML = ansiformat(event.data);
-                    fragment.appendChild(newLine);
-                    scrollback--;
-                } else if (scrollback == 0) {
-                    var newLine = document.createElement('p');
-                    newLine.className = "term_line";
-                    newLine.innerHTML = ansiformat(event.data);
-                    fragment.appendChild(newLine);
-                    term.append(fragment);
-                    scrollback--;
-                    term.scrollTop(term.prop("scrollHeight"));
-                } else {
-                    var newLine = document.createElement('p');
-                    newLine.className = "term_line";
-                    newLine.innerHTML = ansiformat(event.data);
-                    term.append(newLine);
-                    term.scrollTop(term.prop("scrollHeight"));
-                }
-            }
+	var socket = new WebSocket(protocol + "://" + document.domain + ":" + window.location.port + "/socket");
 
-        }});
+	socket.onmessage = function (event) {
+		if (event.data.contains("SCROLLBACK")) {
+			dataArray = event.data.split(" ");
+			scrollback = dataArray[1];
+		}
+
+		if (scrollback > 0) {
+			var newLine = document.createElement('p');
+			newLine.className = "term_line";
+			newLine.innerHTML = ansiformat(event.data);
+			fragment.appendChild(newLine);
+			scrollback--;
+		} else if (scrollback == 0) {
+			var newLine = document.createElement('p');
+			newLine.className = "term_line";
+			newLine.innerHTML = ansiformat(event.data);
+			fragment.appendChild(newLine);
+			term.append(fragment);
+			scrollback--;
+			term.scrollTop(term.prop("scrollHeight"));
+		} else {
+			var newLine = document.createElement('p');
+			newLine.className = "term_line";
+			newLine.innerHTML = ansiformat(event.data);
+			term.append(newLine);
+			term.scrollTop(term.prop("scrollHeight"));
+		}
+	}
 
     $("#cmd_box").on('keypress', function (event) {
         if(event.which === 13){
