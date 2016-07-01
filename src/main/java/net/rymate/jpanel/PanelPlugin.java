@@ -40,9 +40,13 @@ public class PanelPlugin extends JavaPlugin {
     private FileConfiguration config;
 
     private int httpPort = 4567;
-    private String socketPath = "";
 
-    private PanelSessions sessions;
+	private boolean useSsl = false;
+	private String keystorePath = "";
+	private String keystorePassword = "";
+
+
+	private PanelSessions sessions;
 
 	public static PanelPlugin getInstance() {
 		return instance;
@@ -76,9 +80,20 @@ public class PanelPlugin extends JavaPlugin {
             }
         }
 
-        config.set("http-port", config.get("http-port", httpPort));
+		config.set("http-port", config.get("http-port", httpPort));
 
-        httpPort = config.getInt("http-port");
+		config.set("use-ssl", config.get("use-ssl", useSsl));
+		config.set("keystore-name", config.get("keystore-name", keystorePath));
+		config.set("keystore-password", config.get("keystore-password", keystorePassword));
+
+		httpPort = config.getInt("http-port");
+		useSsl = config.getBoolean("use-ssl");
+		keystorePath = getDataFolder() + "/" + config.getString("keystore-name");
+		keystorePassword = config.getString("keystore-password");
+
+		if (useSsl) {
+			secure(keystorePath, keystorePassword, null, null);
+		}
 
         saveConfig();
 
