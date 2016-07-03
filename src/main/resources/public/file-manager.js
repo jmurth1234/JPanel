@@ -6,6 +6,11 @@ var singleColumn = false;
 var master = $('#masterColumn');
 var detail = $('#detailColumn');
 
+var editorContainer = $('#editor');
+
+var header = $('#panel-header');
+
+
 var yamlDef = {
 	// Set defaultToken to invalid to see what you do not tokenize yet
 	defaultToken: 'invalid',
@@ -168,8 +173,8 @@ $(document).ready(function () {
 });
 
 window.addEventListener('resize', function(event){
-	editor.layout();
 	responsiveUi();
+	editor.layout();
 });
 
 function responsiveUi() {
@@ -185,6 +190,9 @@ function responsiveUi() {
 	if (!singleColumn) {
 		master.show();
 		detail.show();
+		editorContainer.height(editorContainer.height() - 76);
+
+		header.show()
 	} else {
 		master.show();
 		detail.hide();
@@ -285,7 +293,15 @@ function openFile(file) {
 			if (singleColumn) {
 				master.hide();
 				detail.show();
+
+				editorContainer.height(editorContainer.height() + 76);
+
+				header.hide();
 			}
+
+			console.log(document.getElementById('panel-header').style.height);
+
+			editor.layout();
 		}});
 }
 
@@ -300,6 +316,9 @@ function saveFile() {
 		if (singleColumn) {
 			master.show();
 			detail.hide();
+			editorContainer.height(editorContainer.height() - 76);
+
+			header.show();
 		}
     });
 }
