@@ -1,6 +1,10 @@
 var currentDir = "";
 // prepare monaco
 var editor;
+var singleColumn = false;
+
+var master = $('#masterColumn');
+var detail = $('#detailColumn');
 
 var yamlDef = {
 	// Set defaultToken to invalid to see what you do not tokenize yet
@@ -158,8 +162,34 @@ $(document).ready(function () {
                 var file = {"file": result.files[i]};
                 fileList.append(tmpl("file_tmpl", file));
             }
-        }});
+        }
+	});
+	responsiveUi()
 });
+
+window.addEventListener('resize', function(event){
+	editor.layout();
+	responsiveUi();
+});
+
+function responsiveUi() {
+	var w = window.innerWidth
+		|| document.documentElement.clientWidth
+		|| document.body.clientWidth;
+
+	if (singleColumn && w <= 600) return;
+	if (!singleColumn && w >= 600) return;
+
+	singleColumn = (w <= 600);
+
+	if (!singleColumn) {
+		master.show();
+		detail.show();
+	} else {
+		master.show();
+		detail.hide();
+	}
+}
 
 function loadCurrentDir() {
 	$.ajax({
@@ -244,22 +274,38 @@ function openFile(file) {
 				editor = monaco.editor.create(document.getElementById("editor"), {
 					value: result,
 					scrollBeyondLastLine: false,
+					renderWhitespace: true,
+					folding: true,
+					indentGuides: false,
 					theme: "vs-dark",
 					language: 'yaml'
 				});
 			}
-        }});
+
+			if (singleColumn) {
+				master.hide();
+				detail.show();
+			}
+		}});
 }
 
 function saveFile() {
-    $.post( "/file/" + currentFile, editor.value, function(result) {
+    $.post( "/file/" + currentFile, editor.getValue(), function(result) {
         if (result == 0) {
             alert( "You're not allowed to edit files!" );
         } else {
             alert( "File successfully saved!" );
         }
+
+		if (singleColumn) {
+			master.show();
+			detail.hide();
+		}
     });
 }
+
+
+
 
 
 

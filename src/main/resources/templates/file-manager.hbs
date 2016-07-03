@@ -37,8 +37,8 @@
             width: 100%;
             height: calc(100vh - 144px);
 			overflow: hidden;
-            padding-top: 10px;;
-            padding-bottom: 10px;
+            margin-top: 10px;;
+            margin-bottom: 10px;
         }
 
         .collection-item.avatar {
@@ -113,6 +113,10 @@
             z-index: -1;
         }
 
+		.white.yaml {
+			background: none !important;
+		}
+
 
     </style>
 </head>
@@ -124,7 +128,7 @@
 <main>
     <div class="container">
         <div class="row">
-            <div class="col s12 m4">
+            <div class="col s12 m4" id="masterColumn">
                 <div id="file-list" class="collection">
 
                 </div>
@@ -133,7 +137,7 @@
 					<input id="upload-btn" name="upload-btn" type="file" class="inputfile"/>
 				</form>
             </div>
-            <div class="col s12 m8">
+            <div class="col s12 m8" id="detailColumn">
                 <div id="editor"></div>
                 <a id="save-btn" class="waves-effect waves-light btn" onclick="saveFile()">Save File</a>
             </div>
