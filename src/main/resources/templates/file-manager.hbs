@@ -36,6 +36,9 @@
         #editor {
             width: 100%;
             height: calc(100vh - 144px);
+			overflow: hidden;
+            padding-top: 10px;;
+            padding-bottom: 10px;
         }
 
         .collection-item.avatar {
@@ -131,7 +134,7 @@
 				</form>
             </div>
             <div class="col s12 m8">
-                <pre id="editor"></pre>
+                <div id="editor"></div>
                 <a id="save-btn" class="waves-effect waves-light btn" onclick="saveFile()">Save File</a>
             </div>
         </div>
@@ -183,10 +186,15 @@
 
 <!--Import jQuery before materialize.js-->
 <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
-<script type="text/javascript" src="/file-manager.js"></script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.96.1/js/materialize.min.js"></script>
 
-<script src="/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+<script src="/monaco-editor/dev/vs/loader.js" type="text/javascript" charset="utf-8"></script>
+
+<script type="text/javascript" src="/file-manager.js"></script>
+<script type="text/javascript" src="/file-manager-rightclick.js"></script>
+
+
 <script>
     $(document).ready(function () {
         $(".button-collapse").sideNav();

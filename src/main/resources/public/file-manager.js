@@ -1,8 +1,150 @@
 var currentDir = "";
+// prepare monaco
 var editor;
+
+var yamlDef = {
+	// Set defaultToken to invalid to see what you do not tokenize yet
+	defaultToken: 'invalid',
+
+	keywords: [], // yaml has no key words
+
+	operators: [],
+
+	brackets: [
+		['(',')','delimiter.parenthesis'],
+		['{','}','delimiter.curly'],
+		['[',']','delimiter.square']
+	],
+
+	// operator symbols
+	symbols:    /[=><!~&|+\-*\/\^%]+/,
+	delimiters: /[;=.@:,`]/,
+
+	yamlkeys: /(?:[A-z0-9_-]*)(:)/,
+
+	// strings
+	escapes: /\\(?:[abfnrtv\\"'\n\r]|x[0-9A-Fa-f]{2}|[0-7]{3}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}|N\{\w+\})/,
+	rawpre: /(?:[rR]|ur|Ur|uR|UR|br|Br|bR|BR)/,
+	strpre: /(?:[buBU])/,
+
+	// The main tokenizer for our languages
+	tokenizer: {
+		root: [
+			[/@yamlkeys/, { token: 'keyword', bracket: '@open' }], // bracket for indentation
+
+			// strings: need to check first due to the prefix
+			[/@strpre?("""|''')/, { token: 'string.delim', bracket: '@open', next: '@mstring.$1' } ],
+			[/@strpre?"([^"\\]|\\.)*$/, 'string.invalid' ],  // non-teminated string
+			[/@strpre?'([^'\\]|\\.)*$/, 'string.invalid' ],  // non-teminated string
+			[/@strpre?(["'])/,  { token: 'string.delim', bracket: '@open', next: '@string.$1' } ],
+
+			[/@rawpre("""|''')/, { token: 'string.delim', bracket: '@open', next: '@mrawstring.$1' } ],
+			[/@rawpre"([^"\\]|\\.)*$/, 'string.invalid' ],  // non-teminated string
+			[/@rawpre'([^'\\]|\\.)*$/, 'string.invalid' ],  // non-teminated string
+			[/@rawpre(["'])/,  { token: 'string.delim', bracket: '@open', next: '@rawstring.$1' } ],
+
+			// identifiers and keywords
+			[/__[\w$]*/, 'predefined' ],
+			[/[a-z_$][\w$]*/, { cases: { '@keywords': 'keyword',
+				'@default': 'identifier' } }],
+			[/[A-Z][\w]*/, { cases: { '~[A-Z0-9_]+': 'constructor.identifier',
+				'@default'   : 'namespace.identifier' }}],  // to show class names nicely
+
+			// whitespace
+			{ include: '@whitespace' },
+
+			// delimiters and operators
+			[/[{}()\[\]]/, '@brackets'],
+			[/@symbols/, { cases: { '@keywords' : 'keyword',
+				'@operators': 'operator',
+				'@default'  : '' } } ],
+
+			// numbers
+			[/\d*\.\d+([eE][\-+]?\d+)?/,   'number.float'],
+			[/0[xX][0-9a-fA-F]+[lL]?/,     'number.hex'],
+			[/0[bB][0-1]+[lL]?/,           'number.binary'],
+			[/(0[oO][0-7]+|0[0-7]+)[lL]?/, 'number.octal'],
+			[/(0|[1-9]\d*)[lL]?/,          'number'],
+
+			//[/@yamlkeys/, 'keyword'],
+
+			// delimiter: after number because of .\d floats
+
+			[/@delimiters/, { cases: { '@keywords': 'keyword',
+				'@default': 'delimiter' }}],
+
+		],
+
+		comment: [
+			[/[^\/*]+/, 'comment' ],
+			[/\/\*/,    'comment', '@push' ],    // nested comment
+			["\\*/",    'comment', '@pop'  ],
+			[/[\/*]/,   'comment' ]
+		],
+
+		// Regular strings
+		mstring: [
+			{ include: '@strcontent' },
+			[/"""|'''/,  { cases: { '$#==$S2':  { token: 'string.delim', bracket: '@close', next: '@pop' },
+				'@default': { token: 'string' } } }],
+			[/["']/, 'string' ],
+			[/./,    'string.invalid'],
+		],
+
+		string: [
+			{ include: '@strcontent' },
+			[/["']/, { cases: { '$#==$S2': { token: 'string.delim', bracket: '@close', next: '@pop' },
+				'@default': { token: 'string' } } } ],
+			[/./, 'string.invalid'],
+		],
+
+		strcontent: [
+			[/[^\\"']+/,  'string'],
+			[/\\$/,       'string.escape'],
+			[/@escapes/,  'string.escape'],
+			[/\\./,       'string.escape.invalid'],
+		],
+
+		// Raw strings: we distinguish them to color escape sequences correctly
+		mrawstring: [
+			{ include: '@rawstrcontent' },
+			[/"""|'''/,  { cases: { '$#==$S2':  { token: 'string.delim', bracket: '@close', next: '@pop' },
+				'@default': { token: 'string' } } }],
+			[/["']/, 'string' ],
+			[/./,    'string.invalid'],
+		],
+
+		rawstring: [
+			{ include: '@rawstrcontent' },
+			[/["']/, { cases: { '$#==$S2': { token: 'string.delim', bracket: '@close', next: '@pop' },
+				'@default': { token: 'string' } } } ],
+			[/./, 'string.invalid'],
+		],
+
+		rawstrcontent: [
+			[/[^\\"']+/, 'string'],
+			[/\\["']/,   'string'],
+			[/\\u[0-9A-Fa-f]{4}/, 'string.escape'],
+			[/\\/, 'string' ],
+		],
+
+		// whitespace
+		whitespace: [
+			[/[ \t\r\n]+/, 'white'],
+			[/#.*$/,       'comment'],
+		],
+	},
+};
 
 $(document).ready(function () {
     $("#save-btn").hide();
+
+	require.config({ paths: { 'vs': '/monaco-editor/dev/vs' }});
+	require(['vs/editor/editor.main'], function() {
+		monaco.languages.register({id: 'yaml'});
+		monaco.languages.setMonarchTokensProvider('yaml', yamlDef);
+	});
+
     $.ajax({
         url: "/file/",
         success: function (result) {
@@ -51,7 +193,6 @@ function openFolder(folder) {
     console.log(currentDir);
 
 	loadCurrentDir();
-
 }
 
 $("#upload-btn").change(function(){
@@ -97,16 +238,21 @@ function openFile(file) {
         success: function (result) {
             $("#save-btn").show();
 
-            editor = ace.edit("editor");
-            editor.setTheme("ace/theme/twilight");
-            editor.getSession().setMode("ace/mode/yaml");
-            editor.setValue(result);
-            editor.gotoLine(1);
+			if (editor) {
+				editor.setValue(result);
+			} else {
+				editor = monaco.editor.create(document.getElementById("editor"), {
+					value: result,
+					scrollBeyondLastLine: false,
+					theme: "vs-dark",
+					language: 'yaml'
+				});
+			}
         }});
 }
 
 function saveFile() {
-    $.post( "/file/" + currentFile, editor.getValue(), function(result) {
+    $.post( "/file/" + currentFile, editor.value, function(result) {
         if (result == 0) {
             alert( "You're not allowed to edit files!" );
         } else {
@@ -115,264 +261,6 @@ function saveFile() {
     });
 }
 
-
-//////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-//
-// H E L P E R    F U N C T I O N S
-//
-//////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////
-/**
- * Function to check if we clicked inside an element with a particular class
- * name.
- *
- * @param {Object} e The event
- * @param {String} className The class name to check against
- * @return {Boolean}
- */
-function clickInsideElement( e, className ) {
-    var el = e.srcElement || e.target;
-
-    if ( el.classList.contains(className) ) {
-        return el;
-    } else {
-        while ( el = el.parentNode ) {
-            if ( el.classList && el.classList.contains(className) ) {
-                return el;
-            }
-        }
-    }
-
-    return false;
-}
-
-/**
- * Get's exact position of event.
- *
- * @param {Object} e The event passed in
- * @return {Object} Returns the x and y position
- */
-function getPosition(e) {
-    var posx = 0;
-    var posy = 0;
-
-    if (!e) var e = window.event;
-
-    if (e.pageX || e.pageY) {
-        posx = e.pageX;
-        posy = e.pageY;
-    } else if (e.clientX || e.clientY) {
-        posx = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
-        posy = e.clientY + document.body.scrollTop + document.documentElement.scrollTop;
-    }
-
-    return {
-        x: posx,
-        y: posy
-    }
-}
-
-/**
- * Variables.
- */
-var contextMenuClassName = "context-menu";
-var contextMenuItemClassName = "context-menu__item";
-var contextMenuLinkClassName = "context-menu__link";
-var contextMenuActive = "context-menu--active";
-
-var taskItemClassName = "collection-item";
-var taskItemInContext;
-
-var clickCoords;
-var clickCoordsX;
-var clickCoordsY;
-
-var menu = document.querySelector("#context-menu");
-var menuItems = menu.querySelectorAll(".context-menu__item");
-var menuState = 0;
-var menuWidth;
-var menuHeight;
-var menuPosition;
-var menuPositionX;
-var menuPositionY;
-
-var windowWidth;
-var windowHeight;
-
-/**
- * Initialise our application's code.
- */
-function init() {
-    contextListener();
-    clickListener();
-    keyupListener();
-    resizeListener();
-}
-
-/**
- * Listens for contextmenu events.
- */
-function contextListener() {
-    document.addEventListener( "contextmenu", function(e) {
-        taskItemInContext = clickInsideElement( e, taskItemClassName );
-
-        if ( taskItemInContext ) {
-            e.preventDefault();
-            toggleMenuOn();
-            positionMenu(e);
-        } else {
-            taskItemInContext = null;
-            toggleMenuOff();
-        }
-    });
-}
-
-/**
- * Listens for click events.
- */
-function clickListener() {
-    document.addEventListener( "click", function(e) {
-        var clickeElIsLink = clickInsideElement( e, contextMenuLinkClassName );
-
-        if ( clickeElIsLink ) {
-            e.preventDefault();
-            menuItemListener( clickeElIsLink );
-        } else {
-            var button = e.which || e.button;
-            if ( button === 1 ) {
-                toggleMenuOff();
-            }
-        }
-    });
-}
-
-/**
- * Listens for keyup events.
- */
-function keyupListener() {
-    window.onkeyup = function(e) {
-        if ( e.keyCode === 27 ) {
-            toggleMenuOff();
-        }
-    }
-}
-
-/**
- * Window resize event listener
- */
-function resizeListener() {
-    window.onresize = function(e) {
-        toggleMenuOff();
-    };
-}
-
-/**
- * Turns the custom context menu on.
- */
-function toggleMenuOn() {
-    if ( menuState !== 1 ) {
-        menuState = 1;
-        menu.classList.add( contextMenuActive );
-    }
-}
-
-/**
- * Turns the custom context menu off.
- */
-function toggleMenuOff() {
-    if ( menuState !== 0 ) {
-        menuState = 0;
-        menu.classList.remove( contextMenuActive );
-    }
-}
-
-/**
- * Positions the menu properly.
- *
- * @param {Object} e The event
- */
-function positionMenu(e) {
-    clickCoords = getPosition(e);
-    clickCoordsX = clickCoords.x;
-    clickCoordsY = clickCoords.y;
-
-    menuWidth = menu.offsetWidth + 4;
-    menuHeight = menu.offsetHeight + 4;
-
-    windowWidth = window.innerWidth;
-    windowHeight = window.innerHeight;
-
-    if ( (windowWidth - clickCoordsX) < menuWidth ) {
-        menu.style.left = windowWidth - menuWidth + "px";
-    } else {
-        menu.style.left = clickCoordsX + "px";
-    }
-
-    if ( (windowHeight - clickCoordsY) < menuHeight ) {
-        menu.style.top = windowHeight - menuHeight + "px";
-    } else {
-        menu.style.top = clickCoordsY + "px";
-    }
-}
-
-/**
- * function that sends an action to the server when a menu item link is clicked
- *
- * @param {HTMLElement} link The link that was clicked
- */
-function menuItemListener( link ) {
-	currentFile = currentDir + "/" + taskItemInContext.getAttribute("data-filepath");
-
-	console.log( "File type - " + taskItemInContext.getAttribute("data-filetype") + ", File path - " + currentFile);
-    console.log( "Link action - " + link.getAttribute("data-action"));
-
-	var file_action = {
-		"action": link.getAttribute("data-action"),
-		"type": taskItemInContext.getAttribute("data-filetype"),
-		"target": currentFile,
-	};
-
-	if (file_action.action == "Remove" && !confirm("Are you sure you want to delete this file?")) {
-		return;
-	}
-
-	if (file_action.action == "Rename") {
-		file_action["value"] = prompt("What would you like to rename this file to?", taskItemInContext.getAttribute("data-filepath"));
-	}
-
-	if (file_action.action == "Download") {
-		// fun
-		document.getElementById('download').src = window.location.protocol + "//" + document.domain + ":" + window.location.port + "/file/" + currentFile;
-		return;
-	}
-
-
-	$.ajax({
-		url: "/files/manager",
-		type: 'POST',
-		contentType: 'application/json; charset=utf-8',
-		dataType: 'json',
-		data: JSON.stringify(file_action),
-		success: function (result) {
-			var res = result;
-			if (res.success) {
-				alert(file_action.action + " successful!");
-			} else {
-				alert(res.reason);
-			}
-		}
-	});
-
-	loadCurrentDir();
-
-	toggleMenuOff();
-}
-
-/**
- * Run the app.
- */
-init();
 
 
 // Simple JavaScript Templating
