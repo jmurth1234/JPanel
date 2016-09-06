@@ -36,7 +36,8 @@ public class PanelPlugin extends JavaPlugin {
     private static final java.util.logging.Logger log = java.util.logging.Logger.getLogger("Minecraft-Server");
     private static final org.apache.logging.log4j.core.Logger logger = (org.apache.logging.log4j.core.Logger) LogManager.getRootLogger();
 	private static PanelPlugin instance;
-	private ConsoleSocket socket;
+    private static boolean debugMode = false;
+    private ConsoleSocket socket;
     private FileConfiguration config;
 
     private int httpPort = 4567;
@@ -48,7 +49,7 @@ public class PanelPlugin extends JavaPlugin {
 
 	private PanelSessions sessions;
 
-	public static PanelPlugin getInstance() {
+    public static PanelPlugin getInstance() {
 		return instance;
 	}
 
@@ -61,7 +62,6 @@ public class PanelPlugin extends JavaPlugin {
     public void onEnable() {
         Lag lag = Lag.getInstance();
         sessions = PanelSessions.getInstance();
-        extractResources(getClass(), "public");
 		instance = this;
 
         getServer().getScheduler().scheduleSyncRepeatingTask(this, lag, 100L, 1L);
@@ -80,15 +80,21 @@ public class PanelPlugin extends JavaPlugin {
             }
         }
 
-		config.set("http-port", config.get("http-port", httpPort));
+        config.set("http-port", config.get("http-port", httpPort));
+
+        config.set("debug-mode", config.get("debug-mode", debugMode));
 
 		config.set("use-ssl", config.get("use-ssl", useSsl));
 		config.set("keystore-name", config.get("keystore-name", keystorePath));
 		config.set("keystore-password", config.get("keystore-password", keystorePassword));
 
-		httpPort = config.getInt("http-port");
+        httpPort = config.getInt("http-port");
+        debugMode = config.getBoolean("debug-mode");
 		useSsl = config.getBoolean("use-ssl");
-		keystorePath = getDataFolder() + "/" + config.getString("keystore-name");
+
+        extractResources(getClass(), "public");
+
+        keystorePath = getDataFolder() + "/" + config.getString("keystore-name");
 		keystorePassword = config.getString("keystore-password");
 
 		if (useSsl) {
@@ -145,6 +151,10 @@ public class PanelPlugin extends JavaPlugin {
             new PlayerManagerPlus("/permissions", this);
         }
 
+    }
+
+    public static void debug(String s) {
+        if (debugMode) System.out.println("[JPanel DEBUG] - " + s);
     }
 
     @Override
@@ -250,8 +260,10 @@ public class PanelPlugin extends JavaPlugin {
     }
 
     public static void extractResources(Class<? extends JavaPlugin> pluginClass, String filePath) {
+        debug("Extracting resources from " + pluginClass.getName());
         try {
             File dest = new File(new File(".").getAbsolutePath() + "/JPanel-public/");
+            debug("Destination: " + dest.getPath());
 
             if (!dest.exists()) {
                 dest.mkdir();
@@ -272,9 +284,12 @@ public class PanelPlugin extends JavaPlugin {
                         name = name.replace(filePath + "/", "");
                         File outFile = new File(dest + "/" + name);
                         if (name.endsWith("/")) {
+                            debug("Creating folder: " + outFile.getPath());
                             outFile.mkdirs();
                         } else {
                             if (outFile.isDirectory()) continue;
+
+                            debug("Creating file: " + outFile.getPath());
 
                             if (!outFile.exists()) outFile.createNewFile();
                             OutputStream out = new FileOutputStream(outFile);
@@ -291,6 +306,8 @@ public class PanelPlugin extends JavaPlugin {
                 jar.close();
             }
         } catch (IOException e) {
+            logger.error("Failed to copy files to the ./JPanel-public/ folder");
+            logger.error("Please report the following error to rymate1234!");
             e.printStackTrace();
         }
     }
