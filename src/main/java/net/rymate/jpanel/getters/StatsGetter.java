@@ -40,9 +40,16 @@ public class StatsGetter extends GetterBase {
         OperatingSystemMXBean os = ManagementFactory.getOperatingSystemMXBean();
         int processors = os.getAvailableProcessors();
 
+        //system load is -1 if you use it with windows
         double usage = os.getSystemLoadAverage() / processors;
 
         long cpuUsage = Math.round(usage * 100.0D);
+
+        //works for all platforms, but only if the Oracle JRE/JDK is installed
+        if (os instanceof com.sun.management.OperatingSystemMXBean) {
+            com.sun.management.OperatingSystemMXBean oracleOs = (com.sun.management.OperatingSystemMXBean) os;
+            cpuUsage = (long) (oracleOs.getSystemCpuLoad() * 100);
+        }
 
         // shove in a hashmap
         Map map = new HashMap();
