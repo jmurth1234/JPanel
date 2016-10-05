@@ -1,5 +1,5 @@
 name: JPanel
-version: 1.0-SNAPSHOT
+version: 1.0-Beta8
 description: Adds a web panel to a minecraft server.
 author: rymate1234
 load: STARTUP
