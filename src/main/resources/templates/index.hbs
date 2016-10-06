@@ -2,7 +2,7 @@
 <html>
 <head>
     <!--Import materialize.css-->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.96.1/css/materialize.min.css">
+    <link rel="stylesheet" href="/main.css">
     {{#if dark}}
         <link rel="stylesheet" href="/dark.css">
     {{/if}}
@@ -12,54 +12,6 @@
     <!--Let browser know website is optimized for mobile-->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 
-    <style>
-        body {
-            display: flex;
-            min-height: 100vh;
-            flex-direction: column;
-        }
-
-        main {
-            flex: 1 0 auto;
-        }
-
-        .container {
-            width: 100% !important;
-        }
-
-        .input-field {
-            position: relative;
-            margin-top: 0rem;
-            background-color: #000;
-            color: #fff;
-        }
-
-        #term {
-            height: 500px;
-            background: #000;
-            color: #fff;
-            word-wrap: break-word;
-        }
-
-        #cmd_box {
-            height: 32px;
-        }
-
-        .term_line {
-            margin: 0;
-            font-family: Consolas, Monaco, monospace;
-        }
-
-        progress {
-            width: 100%;
-        }
-
-        .nano { background: #000; width: 100%; height: 500px; }
-        .nano .nano-content { padding: 10px; }
-        .nano .nano-pane   { background: #000; }
-        .nano .nano-slider { background: #000; }
-
-    </style>
 </head>
 
 <body>
@@ -68,41 +20,39 @@
 
 <main>
     <div class="container">
-        <div class="row">
-            <div class="col s12 m8">
-                <h4>Terminal</h4>
+        <div class="page-content">
+            <h4>Terminal</h4>
 
-                <div id="term" class="nano">
-                    <div id="term-content" class="nano-content"></div>
+            <div id="term" class="nano">
+                <div id="term-content" class="nano-content"></div>
+            </div>
+
+            <form id="cmd_form">
+                <div class="input-field col s12">
+                    <i class="material-icons prefix">chevron_right</i>
+                    <input id="cmd_box"
+                           autocapitalize="off"
+                           autocorrect="off"
+                           autocomplete="off"
+                           placeholder="Execute a command..." type="text" class="validate">
                 </div>
+            </form>
+        </div>
+        <div class="sidebar">
+            <h4>Server Stats</h4>
 
-                <form id="cmd_form">
-                    <div class="input-field col s12">
-                        <i class="material-icons prefix">chevron_right</i>
-                        <input id="cmd_box"
-                               autocapitalize="off"
-                               autocorrect="off"
-                               autocomplete="off"
-                               placeholder="Execute a command..." type="text" class="validate">
-                    </div>
-                </form>
-            </div>
-            <div class="col s12 m4">
-                <h4>Server Stats</h4>
+            <h5>CPU Usage</h5>
+            <p id="cpu-text">loading...</p>
+            <progress id="cpu"></progress>
 
-                <h5>CPU Usage</h5>
-                <p id="cpu-text">loading...</p>
-                <progress id="cpu"></progress>
+            <h5>RAM Usage</h5>
+            <p id="ram-text">loading...</p>
+            <progress id="ram"></progress>
 
-                <h5>RAM Usage</h5>
-                <p id="ram-text">loading...</p>
-                <progress id="ram"></progress>
+            <h5>Server TPS</h5>
+            <p id="tps-text">loading...</p>
+            <progress id="tps"></progress>
 
-                <h5>Server TPS</h5>
-                <p id="tps-text">loading...</p>
-                <progress id="tps"></progress>
-
-            </div>
         </div>
     </div>
 </main>
