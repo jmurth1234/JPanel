@@ -15,16 +15,16 @@ function refresh() {
             url: "/stats",
             success: function (result) {
                 var result = JSON.parse(result);
-                progressRAM.attr("class", "determinate");
-                progressRAM.css("width", (result.free / result.total) * 100 + "%");
+                progressRAM.attr("max", "100");
+                progressRAM.attr("value", (result.free / result.total) * 100 );
                 textRAM.text("RAM: " + Math.round(result.free / 1024) + "MB / " + Math.round(result.total / 1024) + "MB");
 
-                progressCPU.attr("class", "determinate");
-                progressCPU.css("width", result.cpu + "%");
+                progressCPU.attr("max", "100");
+                progressCPU.attr("value", result.cpu);
                 textCPU.text("CPU usage: " + result.cpu + "%");
 
-                progressTPS.attr("class", "determinate");
-                progressTPS.css("width", (result.tps * 5) + "%");
+                progressTPS.attr("max", "100");
+                progressTPS.attr("width", (result.tps * 5));
                 textTPS.text("TPS: " +  Math.round(result.tps));
             },
             error: function (result) {
