@@ -23,8 +23,8 @@ function refresh() {
                 progressCPU.attr("value", result.cpu);
                 textCPU.text("CPU usage: " + result.cpu + "%");
 
-                progressTPS.attr("max", "100");
-                progressTPS.attr("width", (result.tps * 5));
+                progressTPS.attr("max", "20");
+                progressTPS.attr("value",  Math.round(result.tps));
                 textTPS.text("TPS: " +  Math.round(result.tps));
             },
             error: function (result) {
