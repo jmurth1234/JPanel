@@ -8,7 +8,7 @@ sourceCompatibility = 8
 repositories {
     mavenCentral()
     maven {
-        url "https://hub.spigotmc.org/nexus/content/groups/public/"
+        url "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
     }
 
     maven {
@@ -19,6 +19,7 @@ repositories {
 
 configurations {
     releaseJars
+    debugJars
 }
 
 dependencies {
@@ -27,11 +28,17 @@ dependencies {
     releaseJars 'com.sparkjava:spark-template-handlebars:1.0.0'
     releaseJars 'com.google.code.gson:gson:2.2.4'
 
+    debugJars "com.sparkjava:spark-core:2.5"
+    debugJars 'com.sparkjava:spark-template-handlebars:1.0.0'
+    debugJars 'com.google.code.gson:gson:2.2.4'
+    debugJars group: 'org.slf4j', name: 'slf4j-simple', version: '1.6.1'
+
     compile 'com.google.code.gson:gson:2.2.4'
     compile "com.sparkjava:spark-core:2.5"
     compile 'com.sparkjava:spark-template-handlebars:1.0.0'
-    compile group: 'org.bukkit', name: 'bukkit', version: '1.8.7-R0.1-SNAPSHOT'
-    compile group: 'net.milkbowl.vault', name: 'Vault', version: '1.5.3'
+
+    compile group: 'org.bukkit', name: 'bukkit', version: '1.11-R0.1-SNAPSHOT'
+    compile group: 'net.milkbowl.vault', name: 'Vault', version: '1.6'
     compile 'org.apache.logging.log4j:log4j-core:2.0.2'
 }
 
@@ -44,3 +51,16 @@ jar {
         exclude '*.html'
     }
 }
+
+task debugJar(type: Jar) {
+    appendix = "debug"
+    from sourceSets.main.output // that's it
+    from (configurations.debugJars.resolve().collect { it.isDirectory() ? it : zipTree(it) }) {
+        exclude 'META-INF/MANIFEST.MF'
+        exclude 'META-INF/*.SF'
+        exclude 'META-INF/*.DSA'
+        exclude 'META-INF/*.RSA'
+        exclude '*.html'
+    }
+}
+

@@ -1,9 +1,4 @@
 <!-- Dropdown Structure -->
-<ul id="plugins-dropdown" class="dropdown-content">
-    {{#each extras}}
-        <li><a href="{{this.path}}">{{this.name}}</a></li>
-    {{/each}}
-</ul>
 
 
 <nav id="panel-header">
@@ -16,7 +11,15 @@
             {{/each}}
 
             {{#if isExtras}}
-                <li><a class="dropdown-button" href="#!" data-activates="plugins-dropdown">Plugin Pages<i class="material-icons right">arrow_drop_down</i></a></li>
+                <li>
+                    <a class="dropdown-button" href="#!" data-activates="plugins-dropdown">Plugin Pages<i class="material-icons right">arrow_drop_down</i></a>
+                    <ul class="dropdown-content hidden">
+                        {{#each extras}}
+                            <li><a href="{{this.path}}">{{this.name}}</a></li>
+                        {{/each}}
+                    </ul>
+                </li>
+
             {{/if}}
             <li><a href="/logout" title="Logout">Logout</a></li>
             <li><a href="/switchtheme" title="Change Theme"><i class="material-icons">settings_brightness</i></a></li>

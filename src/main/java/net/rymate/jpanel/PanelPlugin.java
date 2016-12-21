@@ -239,16 +239,16 @@ public class PanelPlugin extends JavaPlugin {
         return false;
     }
 
-    public synchronized void managePlayer(String name, String action) {
+    public synchronized void managePlayer(String name, String action, String message) {
         new BukkitRunnable() {
             @Override
             public void run() {
                 if (action.equalsIgnoreCase("kick"))
-                    getServer().getPlayer(name).kickPlayer("Kicked!");
+                    getServer().getPlayer(name).kickPlayer(message);
 
                 if (action.equalsIgnoreCase("ban")) {
                     getServer().getPlayer(name).setBanned(true);
-                    getServer().getPlayer(name).kickPlayer("Banned!");
+                    getServer().getPlayer(name).kickPlayer(message);
                 }
             }
         }.runTask(this);

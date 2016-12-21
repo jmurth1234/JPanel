@@ -126,7 +126,15 @@ public class PlayerManagerPlus extends PosterBase {
                     player = requestJson.get("target").getAsString();
                 }
 
-                plugin.managePlayer(player, action);
+                String msgNoun = (action.equals("kick")) ? "kicked" : "banned";
+
+                String message = "You were " + msgNoun + " from the server";
+
+                if (requestJson.has("message")) {
+                    message += ": " + requestJson.get("message");
+                }
+
+                plugin.managePlayer(player, action, message);
             } else if (action.equals("getgroups")) {
                 if (!permission.hasGroupSupport()) {
                     return "your permissions plugin has no groups support";

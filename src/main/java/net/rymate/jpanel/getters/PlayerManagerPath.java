@@ -21,7 +21,9 @@ public class PlayerManagerPath extends GetterBase {
         if (!isLoggedIn(request.cookie("loggedin")))
             return 0;
 
-        ((PanelPlugin)getPlugin()).managePlayer(request.params(":name"), request.params(":action"));
+        String msg = (request.params(":action").equals("kick")) ? "Kicked!" : "Banned!";
+
+        ((PanelPlugin)getPlugin()).managePlayer(request.params(":name"), request.params(":action"), msg);
 
         return "OK";
     }
