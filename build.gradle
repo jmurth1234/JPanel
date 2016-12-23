@@ -5,8 +5,18 @@ apply plugin: 'java'
 
 sourceCompatibility = 8
 
+buildscript {
+    dependencies {
+        classpath files('libs/gradle-trust-all.jar')
+    }
+}
+
+// slap gradle into submission
+apply plugin: 'trust-all'
+
 repositories {
     mavenCentral()
+    mavenLocal()
     maven {
         url "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
     }
@@ -38,7 +48,7 @@ dependencies {
     compile 'com.sparkjava:spark-template-handlebars:1.0.0'
 
     compile group: 'org.bukkit', name: 'bukkit', version: '1.11-R0.1-SNAPSHOT'
-    compile group: 'net.milkbowl.vault', name: 'Vault', version: '1.6'
+    compile group: 'net.milkbowl.vault', name: 'Vault', version: '1.6.6'
     compile 'org.apache.logging.log4j:log4j-core:2.0.2'
 }
 
