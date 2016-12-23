@@ -270,7 +270,7 @@ public class PanelPlugin extends JavaPlugin {
                 dest.setWritable(true);
             }
 
-            File jarFile = new File(pluginClass.getProtectionDomain().getCodeSource().getLocation().getPath());
+            File jarFile = new File(pluginClass.getProtectionDomain().getCodeSource().getLocation().getPath().replace("%20", " "));
 
             if (jarFile.isFile()) {
                 JarFile jar;
