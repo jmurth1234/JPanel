@@ -148,22 +148,25 @@ nav {
 
     input {
         font-size: 110%;
-        box-shadow: inset 0 1px 3px #ddd;
         width: 80%;
 
         padding: 12px 20px;
         margin: 8px 0;
         display: inline-block;
-        border: 1px solid #ccc;
-        border-radius: 4px;
         box-sizing: border-box;
     }
 
-    input:hover {
+    .rich-input {
+        border: 1px solid #ccc;
+        box-shadow: inset 0 1px 3px #ddd;
+        border-radius: 4px;
+    }
+
+    input.rich-input:hover {
         border: 1px solid #aaa;
     }
 
-    input:focus {
+    input.rich-input:focus {
         box-shadow: inset 0 1px 3px $accent-color;
     }
 }
@@ -215,13 +218,13 @@ button {
     margin-right: 6px;
     font-size: 24px;
     display: inline-block;
-    line-height: 32px;
+    line-height: 46px;
 }
 
 #cmd_box {
-    height: 32px;
+    margin: 0;
     background: none;
-    border: 0px;
+    border: 0;
     display: inline-block;
     color: #fff;
     position: absolute;
