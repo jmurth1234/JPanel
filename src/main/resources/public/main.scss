@@ -147,11 +147,40 @@ nav {
     }
 
     input {
-        padding: 5px;
         font-size: 110%;
+        box-shadow: inset 0 1px 3px #ddd;
+        width: 80%;
+
+        padding: 12px 20px;
+        margin: 8px 0;
+        display: inline-block;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+
+    input:hover {
+        border: 1px solid #aaa;
+    }
+
+    input:focus {
+        box-shadow: inset 0 1px 3px $accent-color;
     }
 }
 
+button {
+    font-size: 110%;
+
+    background-color: $accent-color;
+    color: $primary-color-text;
+
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    min-width: 100px;
+}
 
 .page-content, .sidebar {
     float: left;
