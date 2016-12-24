@@ -331,6 +331,20 @@ public class PanelPlugin extends JavaPlugin {
 
 
             return true;
+        } else if (cmd.getName().equalsIgnoreCase("jpanel")) {
+            if (sender instanceof Player) {
+                sender.sendMessage("This must be run by the console!");
+                return true;
+            }
+
+            sender.sendMessage("This server is running JPanel " + getDescription().getVersion());
+            sender.sendMessage("Made by rymate1234");
+
+            sender.sendMessage("------ Commands ------");
+            sender.sendMessage("Command   | Description");
+            sender.sendMessage("/addlogin | adds a user to JPanel");
+            sender.sendMessage("/passwd   | change the password of a JPanel user");
+            return true;
         }
         return false;
     }

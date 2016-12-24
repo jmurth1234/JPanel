@@ -8,6 +8,9 @@ main: net.rymate.jpanel.PanelPlugin
 softdepend: [Vault]
 
 commands:
+  jpanel:
+    description: Information about the current JPanel install
+    usage: /<command>
   addlogin:
     description: Adds a user to jPanel
     usage: /<command> [username] [password]
