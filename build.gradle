@@ -22,7 +22,8 @@ repositories {
 
 }
 
-configurations.all{
+configurations.all {
+    // check for updates every build
     resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
 }
 
@@ -36,7 +37,7 @@ dependencies {
     releaseJars "com.sparkjava:spark-core:2.5.4"
     releaseJars 'com.sparkjava:spark-template-handlebars:1.0.0'
     releaseJars 'com.google.code.gson:gson:2.2.4'
-    releaseJars 'com.vaadin:vaadin-sass-compiler:1.+'
+    releaseJars group: "com.vaadin", name: "vaadin-sass-compiler", version: "1.0.0-SNAPSHOT", changing: true
 
     debugJars group: 'org.slf4j', name: 'slf4j-simple', version: '1.6.1'
 
@@ -47,7 +48,7 @@ dependencies {
     compile group: 'org.bukkit', name: 'bukkit', version: '1.11-R0.1-SNAPSHOT'
     compile group: 'net.milkbowl.vault', name: 'Vault', version: '1.6.6'
     compile 'org.apache.logging.log4j:log4j-core:2.0.2'
-    compile 'com.vaadin:vaadin-sass-compiler:1.+'
+    compile group: "com.vaadin", name: "vaadin-sass-compiler", version: "1.0.0-SNAPSHOT", changing: true
 }
 
 jar {

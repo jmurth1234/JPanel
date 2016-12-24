@@ -216,7 +216,7 @@ public class PanelPlugin extends JavaPlugin {
         }
         String inputPath = input.getAbsolutePath();
 
-        SCSSErrorHandler errorHandler = new SCSSErrorHandler();
+        SCSSErrorHandler errorHandler = new SCSSErrorHandler(getLogger());
         errorHandler.setWarningsAreErrors(false);
         try {
             // Parse stylesheet
