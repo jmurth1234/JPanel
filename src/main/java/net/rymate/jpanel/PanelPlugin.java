@@ -144,7 +144,7 @@ public class PanelPlugin extends JavaPlugin {
 		webSocket("/socket", ConsoleSocket.class);
 
         //staticFileLocation("/public");
-        externalStaticFileLocation(resFolder.getAbsolutePath());
+        externalStaticFileLocation(resFolder.getName() + "/");
 
         Path srcRoot = Paths.get(resFolder.toURI());
 
