@@ -2,8 +2,7 @@
 <html>
 <head>
     <!--Import materialize.css-->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.96.1/css/materialize.min.css">
-    <link rel="stylesheet" href="/term.css">
+    <link rel="stylesheet" href="/main.css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     {{#if dark}}
         <link rel="stylesheet" href="/dark.css">
@@ -45,21 +44,18 @@
 <main class="valign-wrapper">
     <div class="container">
         <form action="/login" method="post">
-            <h4>Please Login</h4>
+            <h1>Please Login</h1>
 
-            <div class="row">
-                <div class="input-field col s12">
-                    <input id="username" name="username" type="text" class="validate">
-                    <label for="username">User Name</label>
-                </div>
+            <div class="input-field">
+                <label for="username">User Name</label>
+                <input id="username" name="username" type="text" class="validate">
             </div>
-            <div class="row">
-                <div class="input-field col s12">
-                    <input id="password" name="password" type="password" class="validate">
-                    <label for="password">Password</label>
-                </div>
+            <div class="input-field">
+                <label for="password">Password</label>
+                <input id="password" name="password" type="password" class="validate">
             </div>
-            <button class="btn waves-effect waves-light" type="submit" name="submit">
+
+            <button class="btn" type="submit" name="submit">
                 Login
             </button>
         </form>

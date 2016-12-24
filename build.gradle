@@ -7,7 +7,7 @@ sourceCompatibility = 8
 
 repositories {
     mavenCentral()
-    mavenLocal()
+
     maven {
         url "https://hub.spigotmc.org/nexus/content/repositories/snapshots/"
     }
@@ -16,6 +16,14 @@ repositories {
         url "http://nexus.hc.to/content/repositories/pub_releases"
     }
 
+    maven {
+        url "http://rymatemc.co.uk:8081/artifactory/libs-snapshot-local"
+    }
+
+}
+
+configurations.all{
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
 }
 
 configurations {
@@ -28,10 +36,8 @@ dependencies {
     releaseJars "com.sparkjava:spark-core:2.5"
     releaseJars 'com.sparkjava:spark-template-handlebars:1.0.0'
     releaseJars 'com.google.code.gson:gson:2.2.4'
+    releaseJars 'com.vaadin:vaadin-sass-compiler:1.+'
 
-    debugJars "com.sparkjava:spark-core:2.5"
-    debugJars 'com.sparkjava:spark-template-handlebars:1.0.0'
-    debugJars 'com.google.code.gson:gson:2.2.4'
     debugJars group: 'org.slf4j', name: 'slf4j-simple', version: '1.6.1'
 
     compile 'com.google.code.gson:gson:2.2.4'
@@ -41,6 +47,7 @@ dependencies {
     compile group: 'org.bukkit', name: 'bukkit', version: '1.11-R0.1-SNAPSHOT'
     compile group: 'net.milkbowl.vault', name: 'Vault', version: '1.6.6'
     compile 'org.apache.logging.log4j:log4j-core:2.0.2'
+    compile 'com.vaadin:vaadin-sass-compiler:1.+'
 }
 
 jar {
@@ -56,6 +63,15 @@ jar {
 task debugJar(type: Jar) {
     appendix = "debug"
     from sourceSets.main.output // that's it
+
+    from (configurations.releaseJars.resolve().collect { it.isDirectory() ? it : zipTree(it) }) {
+        exclude 'META-INF/MANIFEST.MF'
+        exclude 'META-INF/*.SF'
+        exclude 'META-INF/*.DSA'
+        exclude 'META-INF/*.RSA'
+        exclude '*.html'
+    }
+
     from (configurations.debugJars.resolve().collect { it.isDirectory() ? it : zipTree(it) }) {
         exclude 'META-INF/MANIFEST.MF'
         exclude 'META-INF/*.SF'

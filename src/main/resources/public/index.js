@@ -9,11 +9,14 @@ function refresh() {
 
     var progressTPS = $("#tps");
     var textTPS = $("#tps-text");
+    var errorBar = $("#error-bar");
 
     if (connected) {
         $.ajax({
             url: "/stats",
             success: function (result) {
+                errorBar.fadeOut();
+
                 var result = JSON.parse(result);
                 progressRAM.attr("max", "100");
                 progressRAM.attr("value", (result.free / result.total) * 100 );
@@ -28,7 +31,13 @@ function refresh() {
                 textTPS.text("TPS: " +  Math.round(result.tps));
             },
             error: function (result) {
-                Materialize.toast('Connection failed!', 10000,'',function(){connected = true});
+                errorBar.text('Connection failed!');
+                errorBar.fadeIn();
+
+                setTimeout(function () {
+                    connected = true;
+                }, 10000);
+
                 textCPU.text("CPU usage: ?");
                 textTPS.text("TPS: ?");
                 textRAM.text("RAM: ?");

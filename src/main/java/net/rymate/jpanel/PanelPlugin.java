@@ -1,11 +1,18 @@
 package net.rymate.jpanel;
 
+import com.github.jknack.handlebars.internal.Files;
+import com.vaadin.sass.ArgumentParser;
+import com.vaadin.sass.internal.ScssContext;
+import com.vaadin.sass.internal.ScssStylesheet;
+import com.vaadin.sass.internal.handler.SCSSDocumentHandlerImpl;
+import com.vaadin.sass.internal.handler.SCSSErrorHandler;
 import net.rymate.jpanel.Utils.Lag;
 import net.rymate.jpanel.Utils.PasswordHash;
 import net.rymate.jpanel.getters.*;
 import net.rymate.jpanel.posters.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -20,6 +27,8 @@ import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -37,6 +46,7 @@ public class PanelPlugin extends JavaPlugin {
     private static final org.apache.logging.log4j.core.Logger logger = (org.apache.logging.log4j.core.Logger) LogManager.getRootLogger();
 	private static PanelPlugin instance;
     private static boolean debugMode = false;
+    private static File resFolder;
     private ConsoleSocket socket;
     private FileConfiguration config;
 
@@ -92,6 +102,34 @@ public class PanelPlugin extends JavaPlugin {
         debugMode = config.getBoolean("debug-mode");
 		useSsl = config.getBoolean("use-ssl");
 
+        resFolder = new File(new File(".").getAbsolutePath() + "/JPanel-public/");
+        File verFile = new File (resFolder + "/ .resVersion");
+
+        try {
+            String currVer = this.getDescription().getVersion();
+            if (!resFolder.exists()) {
+                resFolder.mkdir();
+                resFolder.setWritable(true);
+            }
+
+            if (verFile.exists()) {
+                String version = Files.read(verFile);
+                if (!version.equals(currVer) || debugMode) {
+                    extractResources(getClass(), "public");
+                }
+            } else {
+                verFile.createNewFile();
+                extractResources(getClass(), "public");
+            }
+
+            PrintWriter out = new PrintWriter(verFile);
+            out.print(currVer);
+            out.flush();
+            out.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         extractResources(getClass(), "public");
 
         keystorePath = getDataFolder() + "/" + config.getString("keystore-name");
@@ -106,7 +144,25 @@ public class PanelPlugin extends JavaPlugin {
 		webSocket("/socket", ConsoleSocket.class);
 
         //staticFileLocation("/public");
-        externalStaticFileLocation(new File(".").getAbsolutePath() + "/JPanel-public/");
+        externalStaticFileLocation(resFolder.getAbsolutePath());
+
+        Path srcRoot = Paths.get(resFolder.toURI());
+
+        File mainScss = srcRoot.resolve("main.scss").toFile();
+        File darkScss = srcRoot.resolve("dark.scss").toFile();
+
+        boolean compiled = true;
+        try {
+            compiled = compileScssFile(mainScss, srcRoot.resolve("main.css").toString());
+            compiled = compileScssFile(darkScss, srcRoot.resolve("dark.css").toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (!compiled) {
+            System.out.println("[JPanel] Error when compiling scss file, panel may not work!");
+        }
+
         port(httpPort);
 
         // pages
@@ -151,6 +207,46 @@ public class PanelPlugin extends JavaPlugin {
             new PlayerManagerPlus("/permissions", this);
         }
 
+    }
+
+    public boolean compileScssFile(File input, String output) throws Exception {
+        if (!input.canRead()) {
+            System.err.println(input.getCanonicalPath() + " could not be read!");
+            return false;
+        }
+        String inputPath = input.getAbsolutePath();
+
+        SCSSErrorHandler errorHandler = new SCSSErrorHandler();
+        errorHandler.setWarningsAreErrors(false);
+        try {
+            // Parse stylesheet
+            ScssStylesheet scss = ScssStylesheet.get(inputPath, null, new SCSSDocumentHandlerImpl(), errorHandler);
+            if (scss == null) {
+                System.err.println("The scss file " + input + " could not be found.");
+                return false;
+            }
+
+            // Compile scss -> css
+            scss.compile(ScssContext.UrlMode.ABSOLUTE);
+
+            // Write result
+            Writer writer = createOutputWriter(output);
+            scss.write(writer, true);
+            writer.close();
+        } catch (Exception e) {
+            throw e;
+        }
+
+        return !errorHandler.isErrorsDetected();
+    }
+
+    private static Writer createOutputWriter(String filename) throws IOException {
+        if (filename == null) {
+            return new OutputStreamWriter(System.out, "UTF-8");
+        } else {
+            File file = new File(filename);
+            return new FileWriter(file);
+        }
     }
 
     public static void debug(String s) {
@@ -261,13 +357,13 @@ public class PanelPlugin extends JavaPlugin {
 
     public static void extractResources(Class<? extends JavaPlugin> pluginClass, String filePath) {
         debug("Extracting resources from " + pluginClass.getName());
-        try {
-            File dest = new File(new File(".").getAbsolutePath() + "/JPanel-public/");
-            debug("Destination: " + dest.getPath());
 
-            if (!dest.exists()) {
-                dest.mkdir();
-                dest.setWritable(true);
+        try {
+            debug("Destination: " + resFolder.getPath());
+
+            if (!resFolder.exists()) {
+                resFolder.mkdir();
+                resFolder.setWritable(true);
             }
 
             File jarFile = new File(pluginClass.getProtectionDomain().getCodeSource().getLocation().getPath().replace("%20", " "));
@@ -282,12 +378,17 @@ public class PanelPlugin extends JavaPlugin {
                     if (name.startsWith(filePath + "/")) {
                         InputStream in = getResourceFromJar(name, pluginClass.getClassLoader());
                         name = name.replace(filePath + "/", "");
-                        File outFile = new File(dest + "/" + name);
+                        File outFile = new File(resFolder + "/" + name);
                         if (name.endsWith("/")) {
                             debug("Creating folder: " + outFile.getPath());
                             outFile.mkdirs();
                         } else {
                             if (outFile.isDirectory()) continue;
+
+                            if ((outFile.getName().equals("_vars.scss") || outFile.getName().equals("custom.scss"))
+                                    && outFile.exists()) {
+                                continue;
+                            }
 
                             debug("Creating file: " + outFile.getPath());
 

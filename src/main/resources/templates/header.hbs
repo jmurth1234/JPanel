@@ -5,19 +5,19 @@
     <div class="nav-wrapper container">
         <a href="#" data-activates="mobile-demo" class="button-collapse"><i class="material-icons">menu</i></a>
         <a href="/" class="brand-logo">JPanel</a>
-        <ul id="nav-mobile" class="right hide-on-med-and-down">
+        <ul class="right hide-on-med-and-down">
             {{#each paths}}
                 <li><a href="{{this.path}}">{{this.name}}</a></li>
             {{/each}}
 
             {{#if isExtras}}
-                <li>
-                    <a class="dropdown-button" href="#!" data-activates="plugins-dropdown">Plugin Pages<i class="material-icons right">arrow_drop_down</i></a>
-                    <ul class="dropdown-content hidden">
+                <li class="dropdown-button">
+                    <a href="#!" data-activates="plugins-dropdown">Plugin Pages<i class="material-icons right">arrow_drop_down</i></a>
+                    <div class="dropdown-content">
                         {{#each extras}}
-                            <li><a href="{{this.path}}">{{this.name}}</a></li>
+                            <a href="{{this.path}}">{{this.name}}</a>
                         {{/each}}
-                    </ul>
+                    </div>
                 </li>
 
             {{/if}}

@@ -3,6 +3,13 @@
 */
 @import 'https://fonts.googleapis.com/css?family=Roboto|Roboto+Mono';
 
+@import 'vars';
+@import 'custom';
+
+* {
+    box-sizing: border-box;
+}
+
 body {
     display: flex;
     min-height: 100vh;
@@ -16,7 +23,8 @@ main {
 }
 
 .container {
-    width: 100% !important;
+    padding-left: 20px;
+    padding-right: 20px;
     max-width: 1280px;
     margin: 0 auto;
 }
@@ -32,7 +40,7 @@ nav, nav .nav-wrapper i, nav a.button-collapse, nav a.button-collapse i {
 nav {
     height: 48px;
     width: 100%;
-    background-color: #ee6e73;
+    background-color: $primary-color;
 }
 
 .button-collapse {
@@ -80,30 +88,70 @@ nav a i {
     display: none;
 }
 
-nav div ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
+nav {
+    ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    ul li {
+        list-style-type: none;
+        display: inline;
+        float: left;
+        margin-left: 5px;
+        padding: 0;
+    }
+
+    /*Hide dropdown links until they are needed*/
+    li .dropdown-content {
+        min-height: 48px;
+        display: none;
+
+        position: absolute;
+
+        box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+        background-color: #eee;
+    }
+
+    /*Make dropdown links vertical*/
+    .dropdown-content a {
+        display: block;
+        float: none;
+
+        width: auto;
+        min-width: 100px;
+        padding: 0 5px;
+
+        text-align: center;
+
+        color: #222;
+        margin-left: 5px;
+        line-height: 36px;
+        text-decoration: none;;
+    }
+
+    /*Display the dropdown on hover*/
+    .dropdown-button:hover .dropdown-content {
+        display: block;
+    }
+
 }
 
-nav div ul li {
-    list-style-type: none;
-    display: inline;
-    float: left;
-    margin-left: 5px;
-    padding: 0;
+.input-field {
+    padding-bottom: 5px;
+
+    label {
+        display: block;
+        font-weight: bold;
+    }
+
+    input {
+        padding: 5px;
+        font-size: 110%;
+    }
 }
 
-.dropdown-content {
-    background-color: #eee;
-}
-
-.dropdown-content li a {
-    color: #222;
-    margin-left: 5px;
-    line-height: 36px;
-    text-decoration: none;
-}
 
 .page-content, .sidebar {
     float: left;
@@ -118,18 +166,19 @@ nav div ul li {
     width: calc(25% - 1em);
 }
 
-.input-field {
+#cmd_form  .input-field {
     position: relative;
     margin-top: 0rem;
-    background-color: #000;
+    background-color: $term-background;
     color: #fff;
 }
 
 #term {
     height: 500px;
-    background: #000;
+    background: $term-background;
     color: #fff;
     word-wrap: break-word;
+    overflow: auto;
 }
 
 .input-field i {
@@ -159,17 +208,19 @@ progress {
     width: 100%;
 }
 
-.nano { background: #000; width: 100%; height: 500px; }
+.nano { background: $term-background; width: 100%; height: 500px; }
 .nano .nano-content { padding: 10px; }
-.nano .nano-pane   { background: #000; }
-.nano .nano-slider { background: #000; }
+.nano .nano-pane   { background: $term-background; }
+.nano .nano-slider { background: $term-background; }
 
 footer {
-    background-color: #ee6e73;
+    background-color: $primary-color-dark;
+    color: $primary-color-text;
+    padding: 5px;
 }
 
 footer a {
-    color: #fff;
+    color: $primary-color-text;
     text-decoration: none;
 }
 
@@ -178,36 +229,6 @@ footer a {
     padding-bottom: 5px;
 }
 
-/*Hide dropdown links until they are needed*/
-li ul {
-    min-height: 48px;
-    display: none;
-}
-
-/*Make dropdown links vertical*/
-li ul li {
-    display: block;
-    float: none;
-}
-
-/*Prevent text wrapping*/
-li ul li a {
-    width: auto;
-    min-width: 100px;
-    padding: 0 5px;
-}
-
-/*Display the dropdown on hover*/
-ul li a:hover + .hidden, .hidden:hover {
-    display: block;
-}
-
-li a {
-    display: block;
-    text-align: center;
-    color: #fff;
-    text-decoration: none;
-}
 
 /*Style for dropdown links*/
 li:hover ul a {
@@ -216,7 +237,20 @@ li:hover ul a {
     line-height: 48px;
 }
 
+#error-bar {
+    background-color: #ff0000;
+    color: #ffffff;
+    font-size: 1.4em;
+    padding: 5px;
+    text-align: center;
+    display: none;
+}
+
 @media screen and (max-width: 768px) {
+    .container {
+        width: 100%;
+    }
+
     ul {
         position: static;
         display: none;
