@@ -33,7 +33,7 @@ configurations {
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
-    releaseJars "com.sparkjava:spark-core:2.5"
+    releaseJars "com.sparkjava:spark-core:2.5.4"
     releaseJars 'com.sparkjava:spark-template-handlebars:1.0.0'
     releaseJars 'com.google.code.gson:gson:2.2.4'
     releaseJars 'com.vaadin:vaadin-sass-compiler:1.+'
@@ -41,7 +41,7 @@ dependencies {
     debugJars group: 'org.slf4j', name: 'slf4j-simple', version: '1.6.1'
 
     compile 'com.google.code.gson:gson:2.2.4'
-    compile "com.sparkjava:spark-core:2.5"
+    compile "com.sparkjava:spark-core:2.5.4"
     compile 'com.sparkjava:spark-template-handlebars:1.0.0'
 
     compile group: 'org.bukkit', name: 'bukkit', version: '1.11-R0.1-SNAPSHOT'
