@@ -40,6 +40,7 @@ import static spark.Spark.*;
  * <p>
  * Created by Ryan on 22/06/2015.
  */
+
 public class PanelPlugin extends JavaPlugin {
 
     private static final java.util.logging.Logger log = java.util.logging.Logger.getLogger("Minecraft-Server");
@@ -50,7 +51,8 @@ public class PanelPlugin extends JavaPlugin {
     private ConsoleSocket socket;
     private FileConfiguration config;
 
-    private int httpPort = 4567;
+
+	private int httpPort = 4567;
 
 	private boolean useSsl = false;
 	private String keystorePath = "";
@@ -64,7 +66,6 @@ public class PanelPlugin extends JavaPlugin {
 	}
 
 	public void onDisable() {
-        stop();
 
         sessions.destroy();
     }
