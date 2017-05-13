@@ -69,6 +69,7 @@ $(document).ready(function () {
     var scrollback;
     var fragment = document.createDocumentFragment();
     var term = $('#term-content');
+    var termScroll = $('#term');
 
 	var protocol = window.location.protocol != "https:" ? "ws" : "wss";
 
@@ -93,13 +94,13 @@ $(document).ready(function () {
 			fragment.appendChild(newLine);
 			term.append(fragment);
 			scrollback--;
-			term.scrollTop(term.prop("scrollHeight"));
+            termScroll.scrollTop(termScroll.prop("scrollHeight"));
 		} else {
 			var newLine = document.createElement('p');
 			newLine.className = "term_line";
 			newLine.innerHTML = ansiformat(event.data);
 			term.append(newLine);
-			term.scrollTop(term.prop("scrollHeight"));
+            termScroll.scrollTop(termScroll.prop("scrollHeight"));
 		}
 	}
 

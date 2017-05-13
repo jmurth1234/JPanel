@@ -13,6 +13,8 @@
 body {
     display: flex;
     min-height: 100vh;
+    max-height: 100vh;
+    height: 100vh;
     flex-direction: column;
     font-family: "Roboto", sans-serif;
     margin: 0;
@@ -205,12 +207,17 @@ button {
     color: #fff;
 }
 
+.flex-column {
+    flex-direction: column;
+}
+
 #term {
-    height: 500px;
-    background: $term-background;
+    height: 100vh;
+    background: #111;
     color: #fff;
     word-wrap: break-word;
     overflow: auto;
+    max-height: calc(100vh - 250px);
 }
 
 .input-field i {
@@ -277,6 +284,47 @@ li:hover ul a {
     text-align: center;
     display: none;
 }
+
+.collection {
+    height: calc(100vh - 144px);
+    overflow: auto;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.collection-item {
+    display: flex;
+    flex-direction: row;
+    flex: 0 1 300px;
+    padding: 8px;
+    margin: 8px;
+    border: 1px solid #ddd;
+}
+
+.material-icons {
+    height: auto !important;
+    padding-left: 0px !important;
+}
+
+.material-icons {
+    position: relative;
+    width: 42px;
+    overflow: hidden;
+    left: 0px !important;
+    vertical-align: middle;
+    font-size: 24px !important;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+.row {
+    margin-bottom: 0px;
+}
+
+.hidden {
+    display: none;
+}
+
 
 @media screen and (max-width: 768px) {
     .container {

@@ -301,6 +301,10 @@ function openFile(file) {
         url: "/file/" + currentFile,
         success: function (result) {
             $("#save-btn").show();
+            $("#masterColumn").addClass("sidebar");
+
+            $("#detailColumn").removeClass("hidden");
+            $("#detailColumn").addClass("page-content");
 
 			if (editor || isMobile.any) {
 				editor.setValue(result);
