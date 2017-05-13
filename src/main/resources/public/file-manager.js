@@ -282,6 +282,7 @@ $("#upload-btn").change(function(){
 		success: function () {
 			$('#upload-btn-label').text("Upload File");
 			alert("File uploaded");
+            loadCurrentDir();
 		},
 		// Form data
 		data: formData,

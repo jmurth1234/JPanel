@@ -1,5 +1,6 @@
 package net.rymate.jpanel.posters;
 
+import org.bukkit.Bukkit;
 import spark.Request;
 import spark.Response;
 
@@ -21,7 +22,7 @@ public class FilePost extends PosterBase{
 
     @Override
     Object getResponse(Request request, Response response) {
-		MultipartConfigElement multipartConfigElement = new MultipartConfigElement("/");
+		MultipartConfigElement multipartConfigElement = new MultipartConfigElement(new File("").getAbsolutePath());
 		request.raw().setAttribute("org.eclipse.jetty.multipartConfig", multipartConfigElement);
 
         if (!isLoggedIn(request.cookie("loggedin")))
@@ -36,12 +37,12 @@ public class FilePost extends PosterBase{
         }
         splat = splat + "/";
 
-        File file = new File(new File(".").getAbsolutePath() + "/" + splat);
+        File file = new File(splat);
 
         if (!file.exists()) try {
 			Part filePart = request.raw().getPart("upload-btn"); //file is name of the upload form
 
-			filePart.write(file.getAbsolutePath());
+			filePart.write(splat);
 			return true;
 		} catch (IOException e) {
 			e.printStackTrace();
