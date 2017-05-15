@@ -353,6 +353,14 @@ function saveFile() {
     });
 }
 
+function closeFile() {
+    $("#masterColumn").removeClass("sidebar");
+
+    $("#detailColumn").addClass("hidden");
+    $("#detailColumn").removeClass("page-content");
+
+}
+
 // Simple JavaScript Templating
 // John Resig - http://ejohn.org/ - MIT Licensed
 (function(){

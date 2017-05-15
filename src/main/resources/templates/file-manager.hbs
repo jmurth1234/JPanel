@@ -109,13 +109,14 @@
 
             </div>
             <form id="uploadForm">
-                <label id="upload-btn-label" class="btn" for="upload-btn"><button class="btn">Upload File</button></label>
+                <label id="upload-btn-label" class="btn" for="upload-btn">Upload File</label>
                 <input id="upload-btn" name="upload-btn" type="file" class="inputfile"/>
             </form>
         </div>
         <div class="hidden" id="detailColumn">
             <div id="editor"></div>
             <button id="save-btn" class="btn" onclick="saveFile()">Save File</button>
+            <button id="save-btn" class="btn right" onclick="closeFile()">Close File</button>
         </div>
     </div>
 </main>
