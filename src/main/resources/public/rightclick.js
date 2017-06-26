@@ -199,58 +199,6 @@ function positionMenu(e) {
 	}
 }
 
-/**
- * function that sends an action to the server when a menu item link is clicked
- *
- * @param {HTMLElement} link The link that was clicked
- */
-function menuItemListener( link ) {
-	currentFile = currentDir + "/" + taskItemInContext.getAttribute("data-filepath");
-
-	console.log( "File type - " + taskItemInContext.getAttribute("data-filetype") + ", File path - " + currentFile);
-	console.log( "Link action - " + link.getAttribute("data-action"));
-
-	var file_action = {
-		"action": link.getAttribute("data-action"),
-		"type": taskItemInContext.getAttribute("data-filetype"),
-		"target": currentFile,
-	};
-
-	if (file_action.action == "Remove" && !confirm("Are you sure you want to delete this file?")) {
-		return;
-	}
-
-	if (file_action.action == "Rename") {
-		file_action["value"] = prompt("What would you like to rename this file to?", taskItemInContext.getAttribute("data-filepath"));
-	}
-
-	if (file_action.action == "Download") {
-		// fun
-		document.getElementById('download').src = window.location.protocol + "//" + document.domain + ":" + window.location.port + "/file/" + currentFile;
-		return;
-	}
-
-
-	$.ajax({
-		url: "/files/manager",
-		type: 'POST',
-		contentType: 'application/json; charset=utf-8',
-		dataType: 'json',
-		data: JSON.stringify(file_action),
-		success: function (result) {
-			var res = result;
-			if (res.success) {
-				alert(file_action.action + " successful!");
-			} else {
-				alert(res.reason);
-			}
-		}
-	});
-
-	loadCurrentDir();
-
-	toggleMenuOff();
-}
 
 /**
  * Run the app.
