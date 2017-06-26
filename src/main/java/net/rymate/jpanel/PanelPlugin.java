@@ -1,7 +1,6 @@
 package net.rymate.jpanel;
 
 import com.github.jknack.handlebars.internal.Files;
-import com.vaadin.sass.ArgumentParser;
 import com.vaadin.sass.internal.ScssContext;
 import com.vaadin.sass.internal.ScssStylesheet;
 import com.vaadin.sass.internal.handler.SCSSDocumentHandlerImpl;
@@ -12,7 +11,6 @@ import net.rymate.jpanel.getters.*;
 import net.rymate.jpanel.posters.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Logger;
-import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -26,7 +24,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.UnknownHostException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Enumeration;
@@ -168,6 +165,7 @@ public class PanelPlugin extends JavaPlugin {
         // pages
         new SimplePageGetter("/", "index.hbs", this);
         new SimplePageGetter("/files", "file-manager.hbs", this);
+        new PluginsPageGetter("/plugins", "plugins.hbs", this);
 
         // text only paths
         new StatsGetter("/stats");
@@ -182,6 +180,7 @@ public class PanelPlugin extends JavaPlugin {
         PanelNavigation nav = PanelNavigation.getInstance();
         nav.registerPath("/", "Home");
         nav.registerPath("/players", "Players");
+        nav.registerPath("/plugins", "Plugins");
         nav.registerPath("/files", "Files");
 
         if (getServer().getPluginManager().isPluginEnabled("Vault")) {

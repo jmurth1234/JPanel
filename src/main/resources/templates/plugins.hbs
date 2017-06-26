@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="/main.css">
+    {{#if dark}}
+        <link rel="stylesheet" href="/dark.css">
+    {{/if}}
+
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet"           href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.1.1/css/material-design-iconic-font.min.css">
+
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+
+    <style>
+        body {
+            display: flex;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+
+        main {
+            flex: 1 0 auto;
+        }
+
+        .container {
+            width: 100% !important;
+        }
+
+        #editor {
+            width: 100%;
+            height: calc(100vh - 144px);
+			overflow: hidden;
+        }
+
+        /* context menu */
+
+        .context-menu {
+            display: none;
+            position: absolute;
+            z-index: 10;
+            padding: 0px;
+            width: 160px;
+            background-color: #fff;
+            border: solid 1px #dfdfdf;
+            box-shadow: 1px 1px 2px #cfcfcf;
+        }
+
+        .context-menu--active {
+            display: block;
+        }
+
+        .context-menu__items {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .context-menu__item {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .context-menu__item:last-child {
+            margin-bottom: 0;
+        }
+
+        .context-menu__link {
+            display: block;
+            padding: 4px 12px;
+            color: #0066aa;
+            text-decoration: none;
+        }
+
+        .context-menu__link:hover {
+            color: #fff;
+            background-color: #0066aa;
+        }
+
+        .inputfile {
+            width: 0.1px;
+            height: 0.1px;
+            opacity: 0;
+            overflow: hidden;
+            position: absolute;
+            z-index: -1;
+        }
+
+		.white.yaml {
+			background: none !important;
+		}
+
+        .editorArea {
+            height: 100%;
+            font-family: Consolas, Monaco, monospace;
+        }
+
+    </style>
+</head>
+
+<body>
+
+{{{ header }}}
+
+<main>
+    <div class="container">
+        <div class="page-column" id="masterColumn">
+            <div id="file-list" class="collection">
+                {{#each plugins}}
+                    <div data-filetype="file" class="collection-item">
+                        <div class="col">
+                            <i class="material-icons circle">play_circle_outline</i>
+                        </div>
+                        <div class="col s10">
+                            <a href="#!" class="black-text">
+                                {{this.name}}
+                            </a>
+                        </div>
+                    </div>
+                {{/each}}
+            </div>
+            <form id="uploadForm">
+                <label id="upload-btn-label" class="btn" for="upload-btn">Upload Plugin</label>
+                <input id="upload-btn" name="upload-btn" type="file" accept=".jar|.zip" class="inputfile"/>
+            </form>
+        </div>
+        <div class="hidden" id="detailColumn">
+            <div id="editor"></div>
+            <button id="save-btn" class="btn" onclick="saveFile()">Save File</button>
+            <button id="save-btn" class="btn right" onclick="closeFile()">Close File</button>
+        </div>
+    </div>
+</main>
+
+<div id="context-menu" class="context-menu">
+    <ul class="context-menu__items">
+        <li class="context-menu__item">
+            <a href="#" class="context-menu__link" data-action="Rename">Rename File</a>
+        </li>
+        <li class="context-menu__item">
+            <a href="#" class="context-menu__link" data-action="Download">Download File</a>
+        </li>
+        <li class="context-menu__item">
+            <a href="#" class="context-menu__link" data-action="Remove">Remove File</a>
+        </li>
+    </ul>
+</div>
+
+
+<iframe id="download" style="display:none;"></iframe>
+
+
+<!--Import jQuery before materialize.js-->
+<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.96.1/js/materialize.min.js"></script>
+
+<script src="/monaco-editor/dev/vs/loader.js" type="text/javascript" charset="utf-8"></script>
+
+<script type="text/javascript" src="/textIndent.js"></script>
+<script type="text/javascript" src="/file-manager.js"></script>
+<script type="text/javascript" src="/file-manager-rightclick.js"></script>
+
+
+<script>
+    $(document).ready(function () {
+        $(".button-collapse").sideNav();
+    });
+</script>
+</body>
+</html>
