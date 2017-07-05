@@ -47,8 +47,8 @@ public class PanelPlugin extends JavaPlugin {
     private ConsoleSocket socket;
     private FileConfiguration config;
 
-    private int httpPort = 4567;
 
+	private int httpPort = 4567;
 	private boolean useSsl = false;
 	private String keystorePath = "";
 	private String keystorePassword = "";
@@ -61,7 +61,6 @@ public class PanelPlugin extends JavaPlugin {
 	}
 
 	public void onDisable() {
-        stop();
 
         sessions.destroy();
     }
