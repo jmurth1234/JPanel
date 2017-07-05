@@ -255,7 +255,7 @@ public class PanelPlugin extends JavaPlugin {
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (cmd.getName().equalsIgnoreCase("addlogin")) {
-            if (args.length < 1) {
+            if (args.length < 2) {//have to be 2. So when we are supplying only the username (and not the password) it would return 1 and 1=1 and not <!!! so it woukld not enter this routine!
                 sender.sendMessage("You must specify a username and a password!");
                 return true;
             }
